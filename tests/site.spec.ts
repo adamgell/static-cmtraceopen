@@ -198,6 +198,14 @@ test("Field Guide article renders migrated prose and screenshots without overflo
   expect(overflow).toBe(0);
 });
 
+test("privacy surface 03 describes the current download website", async ({ page }) => {
+  await page.goto("/privacy/");
+
+  await expect(page.getByText("SURFACE 03 · DOWNLOAD WEBSITE", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Link selections are counted, not identified." })).toBeVisible();
+  await expect(page.getByText(/future download website|may record aggregate link selections/i)).toHaveCount(0);
+});
+
 test("nightly page presents live development packages in the product design system", async ({ page }) => {
   await page.route("**/api/releases/nightly", (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(nightlyRelease) }),
