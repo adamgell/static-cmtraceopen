@@ -1,0 +1,255 @@
+---
+import TrustContract from "../components/TrustContract.astro";
+import { GUIDES } from "../data/site";
+import ProductLayout from "../layouts/ProductLayout.astro";
+---
+
+<ProductLayout
+  title="CMTrace Open — Windows endpoint evidence, in one workspace"
+  description="CMTrace Open brings Windows endpoint logs together in a fast, native, open-source investigation workspace."
+  canonicalPath="/"
+  image="/images/cmtrace-screenshot.png"
+>
+  <section class="hero evidence-grid" aria-labelledby="product-heading">
+    <div class="hero-copy">
+      <h1 id="product-heading">Windows logs shouldn’t require archaeology.</h1>
+      <p>A native endpoint-evidence workspace for troubleshooting modern Windows—from raw logs to one coherent incident.</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="https://download.cmtraceopen.com/?source=cmtraceopen-product">Download for Windows</a>
+        <a class="button button-secondary" href="#product-view">Explore the product</a>
+      </div>
+      <p class="trust-line">No account required. No runtime telemetry collected.</p>
+    </div>
+  </section>
+
+  <section id="product-view" class="product-view" aria-labelledby="product-view-heading">
+    <h2 id="product-view-heading" class="sr-only">CMTrace Open product view</h2>
+    <figure>
+      <div class="screenshot-frame">
+        <img
+          src="/images/cmtrace-screenshot.png"
+          alt="CMTrace Open displaying correlated Windows endpoint log evidence"
+          width="1244"
+          height="699"
+        />
+      </div>
+      <figcaption>
+        <span class="technical-label">REAL PRODUCT VIEW · WINDOWS ENDPOINT EVIDENCE</span>
+        <span>Inspect the original log context without losing the sequence around a failure.</span>
+      </figcaption>
+    </figure>
+  </section>
+
+  <TrustContract />
+
+  <section class="guides section-rule" aria-labelledby="guides-heading">
+    <div class="section-intro">
+      <span class="technical-label">FIELD GUIDES</span>
+      <h2 id="guides-heading">Start with real Windows evidence.</h2>
+      <p>Focused guides for opening, reading, and following live endpoint logs.</p>
+    </div>
+    <ol class="guide-list">
+      {GUIDES.map((guide, index) => (
+        <li>
+          <span class="technical-label">GUIDE {String(index + 1).padStart(2, "0")}</span>
+          <h3><a href={guide.href}>{guide.title}</a></h3>
+          <p>{guide.summary}</p>
+          <a class="guide-link" href={guide.href}>Read field guide <span aria-hidden="true">↗</span></a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+</ProductLayout>
+
+<style>
+  .hero {
+    display: grid;
+    min-height: auto;
+    align-items: center;
+    padding-block: var(--space-3) clamp(var(--space-5), 5vw, var(--space-6));
+  }
+
+  .hero-copy {
+    max-width: 64rem;
+    animation: signal-in 600ms ease-out both;
+  }
+
+  .hero h1 {
+    max-width: 12ch;
+    margin: 0 0 var(--space-5);
+  }
+
+  .hero-copy > p:not(.trust-line) {
+    max-width: 49rem;
+    margin-bottom: var(--space-5);
+    color: var(--text);
+    font-size: clamp(1.125rem, 2.1vw, 1.5rem);
+    line-height: 1.5;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .trust-line {
+    margin: var(--space-4) 0 0;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.025em;
+  }
+
+  .product-view {
+    padding-top: 0;
+  }
+
+  figure {
+    margin: 0;
+  }
+
+  .screenshot-frame {
+    padding: clamp(0.4rem, 1.2vw, 0.85rem);
+    border: 1px solid var(--line-strong);
+    background: var(--ink-850);
+    box-shadow: 0 32px 80px rgb(0 0 0 / 34%);
+    animation: signal-in 700ms 100ms ease-out both;
+  }
+
+  .screenshot-frame img {
+    width: 100%;
+    border: 1px solid var(--line);
+  }
+
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-top: var(--space-3);
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+  }
+
+  .section-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: var(--space-6);
+    align-items: end;
+  }
+
+  .section-intro .technical-label {
+    grid-column: 1 / -1;
+  }
+
+  .section-intro h2,
+  .section-intro p {
+    margin-bottom: 0;
+  }
+
+  .section-intro p {
+    max-width: 41rem;
+    font-size: 1.0625rem;
+  }
+
+  .guide-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line-strong);
+    list-style: none;
+  }
+
+  .guide-list li {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: var(--space-5);
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .guide-list li:nth-child(3n + 1) {
+    padding-left: 0;
+  }
+
+  .guide-list li:nth-child(3n) {
+    padding-right: 0;
+  }
+
+  .guide-list h3 {
+    margin: var(--space-3) 0;
+    font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+    line-height: 1.2;
+  }
+
+  .guide-list h3 a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .guide-list h3 a:hover,
+  .guide-link:hover {
+    color: var(--cyan);
+  }
+
+  .guide-list p {
+    min-height: 4.8em;
+  }
+
+  .guide-link {
+    margin-top: auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  @keyframes signal-in {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .section-intro {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
+    }
+
+    .guide-list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .guide-list li,
+    .guide-list li:nth-child(3n + 1),
+    .guide-list li:nth-child(3n) {
+      padding: var(--space-5) 0;
+      border-right: 0;
+    }
+
+    .guide-list p {
+      min-height: 0;
+    }
+
+    figcaption {
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero-actions {
+      display: grid;
+    }
+  }
+</style>

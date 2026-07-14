@@ -1,0 +1,180 @@
+---
+import { getCollection, render } from "astro:content";
+import ProductLayout from "../../layouts/ProductLayout.astro";
+
+const order = [
+  "why-cmtrace-open-exists",
+  "5-minutes-cmtrace-open",
+  "log-formats-how-auto-detection-works",
+  "known-log-sources",
+  "real-time-tailing",
+];
+
+export async function getStaticPaths() {
+  const guides = await getCollection("fieldGuide", ({ data }) => !data.draft);
+  return guides.map((guide) => ({ params: { slug: guide.id }, props: { guide } }));
+}
+
+const { guide } = Astro.props;
+const { Content } = await render(guide);
+const guideNumber = String(order.indexOf(guide.id) + 1).padStart(2, "0");
+---
+
+<ProductLayout
+  title={`${guide.data.title} — CMTrace Open Field Guide`}
+  description={guide.data.description}
+  canonicalPath={`/field-guide/${guide.id}/`}
+>
+  <article class="field-guide-article">
+    <header class="article-header evidence-grid">
+      <a class="back-link" href="/field-guide/">← Field Guide</a>
+      <span class="technical-label">FIELD GUIDE · {guideNumber}</span>
+      <h1>{guide.data.title}</h1>
+      <p class="article-deck">{guide.data.description}</p>
+      <time datetime={guide.data.date.toISOString()}>{guide.data.date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</time>
+    </header>
+    <div class="field-guide-copy">
+      <Content />
+    </div>
+    <footer class="article-close">
+      <span class="technical-label">END OF FIELD NOTE · {guideNumber}</span>
+      <a href="/field-guide/">Return to the Field Guide</a>
+    </footer>
+  </article>
+</ProductLayout>
+
+<style is:global>
+  .field-guide-article {
+    width: min(calc(100% - (2 * var(--page-gutter))), var(--content-width));
+    margin-inline: auto;
+  }
+
+  .article-header {
+    display: grid;
+    align-content: end;
+    min-height: 30rem;
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .article-header > * { max-width: 58rem; }
+
+  .back-link,
+  .article-header time,
+  .article-close a {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .back-link {
+    width: fit-content;
+    margin-bottom: var(--space-6);
+    text-decoration: none;
+  }
+
+  .article-header h1 {
+    margin: var(--space-3) 0 var(--space-4);
+    font-size: clamp(2.8rem, 7vw, 6.5rem);
+  }
+
+  .article-deck {
+    margin-bottom: var(--space-4);
+    color: var(--text);
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+  }
+
+  .article-header time { color: var(--text-dim); }
+
+  .field-guide-copy {
+    max-width: 52rem;
+    margin-inline: auto;
+    padding-block: var(--space-7);
+    color: var(--text-muted);
+    font-size: 1.075rem;
+    line-height: 1.75;
+  }
+
+  .field-guide-copy > :first-child { margin-top: 0; }
+
+  .field-guide-copy h2 {
+    margin: var(--space-7) 0 var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+    font-size: clamp(2rem, 4vw, 3.4rem);
+  }
+
+  .field-guide-copy h3 {
+    margin: var(--space-6) 0 var(--space-3);
+    font-size: clamp(1.35rem, 2.5vw, 2rem);
+  }
+
+  .field-guide-copy p,
+  .field-guide-copy ul,
+  .field-guide-copy ol,
+  .field-guide-copy pre,
+  .field-guide-copy table,
+  .field-guide-copy blockquote { margin-block: 0 var(--space-4); }
+
+  .field-guide-copy strong,
+  .field-guide-copy th { color: var(--text); }
+
+  .field-guide-copy li + li { margin-top: var(--space-2); }
+
+  .field-guide-copy code {
+    padding: 0.1rem 0.3rem;
+    background: var(--ink-850);
+    color: var(--text);
+    font-size: 0.9em;
+  }
+
+  .field-guide-copy pre {
+    max-width: 100%;
+    padding: var(--space-4);
+    border: 1px solid var(--line);
+    background: var(--ink-900);
+    overflow-x: auto;
+  }
+
+  .field-guide-copy pre code {
+    padding: 0;
+    background: transparent;
+  }
+
+  .field-guide-copy img {
+    width: 100%;
+    margin-block: var(--space-5);
+    border: 1px solid var(--line-strong);
+    background: var(--ink-900);
+  }
+
+  .field-guide-copy table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+  }
+
+  .field-guide-copy th,
+  .field-guide-copy td {
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .article-close {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--line-strong);
+  }
+
+  @media (max-width: 640px) {
+    .article-header { min-height: 24rem; }
+    .field-guide-copy { padding-block: var(--space-6); font-size: 1rem; }
+    .article-close { flex-direction: column; }
+  }
+</style>

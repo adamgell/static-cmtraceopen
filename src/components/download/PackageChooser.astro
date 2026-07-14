@@ -1,0 +1,50 @@
+<section class="download-chooser" aria-labelledby="package-heading">
+  <div class="chooser-intro">
+    <span class="technical-label">STABLE PACKAGE SELECTOR</span>
+    <h1 id="package-heading">Choose the package that fits the endpoint.</h1>
+    <p>Windows opens first with the full portable x64 application—the simplest supported way to start reading logs.</p>
+  </div>
+
+  <dl class="release-readout" aria-label="Current release">
+    <div>
+      <dt>Release</dt>
+      <dd data-release-name>Discovering…</dd>
+    </div>
+    <div>
+      <dt>Published</dt>
+      <dd data-release-date>Checking GitHub</dd>
+    </div>
+    <div>
+      <dt>Delivery origin</dt>
+      <dd>GitHub Releases</dd>
+    </div>
+    <div>
+      <dt>Signature status</dt>
+      <dd data-signature-status>Inspecting release assets</dd>
+    </div>
+  </dl>
+
+  <div class="platform-tabs" role="tablist" aria-label="Operating system">
+    <button id="tab-windows" type="button" role="tab" aria-selected="true" aria-controls="package-panel" data-platform="windows">Windows</button>
+    <button id="tab-macos" type="button" role="tab" aria-selected="false" aria-controls="package-panel" data-platform="macos" tabindex="-1">macOS</button>
+    <button id="tab-linux" type="button" role="tab" aria-selected="false" aria-controls="package-panel" data-platform="linux" tabindex="-1">Linux</button>
+    <button id="tab-all" type="button" role="tab" aria-selected="false" aria-controls="package-panel" data-platform="all" tabindex="-1">All assets</button>
+  </div>
+
+  <div id="package-panel" class="package-panel" role="tabpanel" aria-labelledby="tab-windows" tabindex="0">
+    <div class="chooser-status" data-chooser-status role="status">Reading the current stable release record…</div>
+    <div class="package-stack" data-package-stack></div>
+    <section class="technical-files" data-technical-files hidden aria-labelledby="technical-files-heading">
+      <div class="technical-files-heading">
+        <span class="technical-label">RELEASE SUPPORT DATA</span>
+        <h3 id="technical-files-heading">Technical release files</h3>
+        <p>Updater manifests, signatures, and software bills of materials are shown for inspection—not as normal application packages.</p>
+      </div>
+      <ul data-technical-list></ul>
+    </section>
+  </div>
+
+  <noscript>
+    <p class="chooser-error">Package discovery requires JavaScript. <a href="https://github.com/adamgell/cmtraceopen/releases">Open GitHub Releases</a> to choose a file directly.</p>
+  </noscript>
+</section>

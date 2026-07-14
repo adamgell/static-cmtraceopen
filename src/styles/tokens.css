@@ -1,0 +1,29 @@
+:root {
+  --ink-950: #071014;
+  --ink-900: #091519;
+  --ink-850: #0a1d21;
+  --line: #24474a;
+  --line-strong: #3e8582;
+  --cyan: #4de5dc;
+  --cyan-ink: #042122;
+  --text: #ecfbfa;
+  --text-muted: #789496;
+  --text-dim: #547376;
+  --failure: #ff6b6b;
+  --trust: #dff7ed;
+  --trust-ink: #092d2b;
+  --success: #73e8b0;
+  --font-sans: "Archivo Variable", "Arial", sans-serif;
+  --font-mono: "IBM Plex Mono", "Consolas", monospace;
+  --content-width: 1180px;
+  --focus-ring: 0 0 0 3px #071014, 0 0 0 5px #4de5dc;
+  --page-gutter: 48px;
+  --space-1: 0.5rem;
+  --space-2: 0.75rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --space-6: 3rem;
+  --space-7: 4.5rem;
+  --space-8: 7rem;
+}

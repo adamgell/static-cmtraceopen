@@ -1,0 +1,38 @@
+---
+import { SITE, WORKFLOWS } from "../../data/site";
+import ProductLayout from "../../layouts/ProductLayout.astro";
+
+const workflow = WORKFLOWS.find(({ slug }) => slug === "windows-setup");
+if (!workflow) throw new Error("Missing workflow data: windows-setup");
+const productDownload = `${SITE.download}?source=cmtraceopen-product`;
+const evidenceRoles = [
+  "Describes setup phases, compatibility checks, migration, driver processing, rollback, and the top-level failure context.",
+  "Records image servicing, package and feature operations, provider activity, and the servicing error returned to setup.",
+  "Shows component-store transactions, manifests, dependencies, corruption checks, and the lower-level reason a servicing action failed.",
+] as const;
+---
+
+<ProductLayout title="Windows setup and servicing — CMTrace Open" description="Investigate Windows setup and servicing failures across Panther, DISM, and CBS evidence." canonicalPath="/workflows/windows-setup/">
+  <section class="workflow-hero evidence-grid" aria-labelledby="workflow-heading"><div><span class="technical-label">WORKFLOW 04 · FIELD INVESTIGATION</span><h1 id="workflow-heading">{workflow.label}.</h1><p>{workflow.summary}</p></div></section>
+  <section class="investigation section-rule" aria-labelledby="investigation-heading">
+    <div class="investigation-start"><span class="technical-label">INVESTIGATION START</span><h2 id="investigation-heading">Start with the failed phase and build transition.</h2><p>Begin with the source and target Windows builds, the setup or servicing operation, and the phase where progress stopped or rolled back. Anchor the investigation to that time window before following component-level errors deeper into the stack.</p></div>
+    <ol class="evidence-list" aria-label={`${workflow.label} evidence sources`}>{workflow.evidence.map((source, index) => (<li><span class="technical-label">EVIDENCE {String(index + 1).padStart(2, "0")}</span><div><h3><code>{source}</code></h3><p>{evidenceRoles[index]}</p></div></li>))}</ol>
+  </section>
+  <section class="correlation evidence-grid section-rule" aria-labelledby="correlation-heading"><div><span class="technical-label">WHAT CMTRACE OPEN CONNECTS</span><h2 id="correlation-heading">Connect setup context to servicing cause.</h2></div><div><p>CMTrace Open keeps Panther’s phase transition beside DISM provider activity and CBS component-store detail, helping distinguish the headline setup error from the package, component, or rollback event that actually explains it.</p><a class="button button-primary" href={productDownload}>Open stable downloads</a></div></section>
+</ProductLayout>
+
+<style>
+  .workflow-hero { display: grid; min-height: 34rem; align-items: end; }
+  .workflow-hero > div { max-width: 66rem; }
+  h1 { max-width: 12ch; margin: var(--space-3) 0 var(--space-4); }
+  .workflow-hero p, .investigation-start p, .correlation p { max-width: 50rem; font-size: clamp(1.0625rem, 2vw, 1.35rem); }
+  .investigation, .correlation { display: grid; grid-template-columns: minmax(18rem, .75fr) minmax(0, 1.25fr); gap: var(--space-7); }
+  .investigation-start h2, .correlation h2 { max-width: 12ch; margin: var(--space-3) 0 var(--space-4); }
+  .evidence-list { margin: 0; padding: 0; border-top: 1px solid var(--line-strong); list-style: none; }
+  .evidence-list li { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--space-4); padding-block: var(--space-5); border-bottom: 1px solid var(--line); }
+  .evidence-list h3 { margin: 0 0 var(--space-2); font-size: clamp(1.25rem, 2.3vw, 2rem); }
+  .evidence-list p { margin: 0; }
+  .correlation p { margin-bottom: var(--space-5); }
+  @media (max-width: 900px) { .investigation, .correlation { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); } }
+  @media (max-width: 560px) { .evidence-list li { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); } }
+</style>

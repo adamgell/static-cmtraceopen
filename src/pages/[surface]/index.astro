@@ -1,0 +1,9 @@
+---
+import DownloadCenter from "../_download/index.astro";
+
+export function getStaticPaths() {
+  return [{ params: { surface: "_download" } }];
+}
+---
+
+<DownloadCenter />

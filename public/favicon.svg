@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CMTrace Open">
+  <rect width="64" height="64" rx="10" fill="#071014"/>
+  <path d="M18 15h28M18 49h28" fill="none" stroke="#24474a" stroke-width="2"/>
+  <path d="M24 22 14 32l10 10M40 22l10 10-10 10" fill="none" stroke="#4de5dc" stroke-linecap="square" stroke-width="5"/>
+  <path d="M28 32h8" fill="none" stroke="#ecfbfa" stroke-width="4"/>
+</svg>

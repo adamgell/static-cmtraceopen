@@ -1,0 +1,106 @@
+<section class="trust-contract" aria-labelledby="trust-heading">
+  <div class="trust-inner">
+    <div class="trust-intro">
+      <span class="technical-label">THE TRUST CONTRACT</span>
+      <h2 id="trust-heading">Your evidence stays yours.</h2>
+      <p>The product promise is deliberately simple and inspectable.</p>
+    </div>
+    <dl>
+      <div>
+        <dt>Local-first analysis</dt>
+        <dd>Open and investigate endpoint evidence in the workspace on your machine.</dd>
+      </div>
+      <div>
+        <dt>No runtime telemetry</dt>
+        <dd>The running application sends no analytics, usage, device, crash, identity, or behavioral telemetry.</dd>
+      </div>
+      <div>
+        <dt>No account required</dt>
+        <dd>Start investigating without registration, sign-in, or a cloud workspace.</dd>
+      </div>
+      <div>
+        <dt>Open-source code and release pipeline</dt>
+        <dd>Inspect how CMTrace Open is built and how its releases are published.</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .trust-contract {
+    width: 100%;
+    max-width: none;
+    padding: var(--space-8) var(--page-gutter);
+    background: var(--trust);
+    color: var(--trust-ink);
+  }
+
+  .trust-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    gap: var(--space-7);
+    width: min(100%, var(--content-width));
+    margin-inline: auto;
+  }
+
+  .technical-label,
+  h2,
+  p,
+  dt,
+  dd {
+    color: var(--trust-ink);
+  }
+
+  h2 {
+    max-width: 8ch;
+    margin: var(--space-3) 0 var(--space-4);
+  }
+
+  p {
+    max-width: 32rem;
+  }
+
+  dl {
+    margin: 0;
+    border-top: 1px solid rgb(9 45 43 / 55%);
+  }
+
+  dl > div {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.75fr) minmax(0, 1.25fr);
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid rgb(9 45 43 / 28%);
+  }
+
+  dt {
+    font-weight: 700;
+  }
+
+  dd {
+    margin: 0;
+    opacity: 0.78;
+  }
+
+  @media (max-width: 900px) {
+    .trust-inner {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
+    }
+
+    h2 {
+      max-width: 12ch;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .trust-contract {
+      padding-block: var(--space-7);
+    }
+
+    dl > div {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-2);
+    }
+  }
+</style>

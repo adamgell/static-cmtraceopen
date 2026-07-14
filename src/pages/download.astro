@@ -1,0 +1,51 @@
+---
+import { SITE } from "../data/site";
+import ProductLayout from "../layouts/ProductLayout.astro";
+
+const productDownload = `${SITE.download}?source=cmtraceopen-product`;
+---
+
+<ProductLayout
+  title="Download — CMTrace Open"
+  description="Continue to the stable CMTrace Open download center for current Windows, macOS, and Linux packages."
+  canonicalPath="/download/"
+>
+  <section class="destination evidence-grid" aria-labelledby="download-heading">
+    <div>
+      <span class="technical-label">STABLE CHANNEL · HANDOFF</span>
+      <h1 id="download-heading">Continue to the stable download center.</h1>
+      <p>Choose the current CMTrace Open package for your platform at the project’s stable download destination.</p>
+      <a class="button button-primary" href={productDownload}>Open stable downloads</a>
+      <p class="destination-note">Destination: <a href={productDownload}>{productDownload}</a></p>
+    </div>
+  </section>
+</ProductLayout>
+
+<style>
+  .destination {
+    display: grid;
+    min-height: min(48rem, calc(100vh - 72px));
+    align-items: center;
+  }
+
+  .destination > div {
+    max-width: 66rem;
+  }
+
+  h1 {
+    max-width: 13ch;
+    margin: var(--space-3) 0 var(--space-4);
+  }
+
+  .destination > div > p:not(.destination-note) {
+    max-width: 46rem;
+    margin-bottom: var(--space-5);
+    font-size: clamp(1.0625rem, 2vw, 1.35rem);
+  }
+
+  .destination-note {
+    margin-top: var(--space-4);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+</style>

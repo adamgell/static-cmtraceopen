@@ -1,0 +1,141 @@
+---
+import { getCollection } from "astro:content";
+import ProductLayout from "../../layouts/ProductLayout.astro";
+
+const order = [
+  "why-cmtrace-open-exists",
+  "5-minutes-cmtrace-open",
+  "log-formats-how-auto-detection-works",
+  "known-log-sources",
+  "real-time-tailing",
+];
+
+const guides = (await getCollection("fieldGuide"))
+  .filter(({ data }) => !data.draft)
+  .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+---
+
+<ProductLayout
+  title="Field Guide — CMTrace Open"
+  description="Practical field guides for reading Windows endpoint evidence with CMTrace Open."
+  canonicalPath="/field-guide/"
+>
+  <section class="field-guide-hero evidence-grid" aria-labelledby="field-guide-heading">
+    <div>
+      <span class="technical-label">FIELD GUIDE · ADAM GELL</span>
+      <h1 id="field-guide-heading">Notes from the endpoint trenches.</h1>
+      <p>Practical walkthroughs for opening unfamiliar logs, following live evidence, and getting to the failure that matters.</p>
+    </div>
+  </section>
+
+  <section class="field-guide-index section-rule" aria-labelledby="field-guide-index-heading">
+    <div class="index-heading">
+      <span class="technical-label">START HERE</span>
+      <h2 id="field-guide-index-heading">Read the Field Guide.</h2>
+    </div>
+    <ol>
+      {guides.map((guide, index) => (
+        <li>
+          <span class="guide-number">{String(index + 1).padStart(2, "0")}</span>
+          <div>
+            <span class="technical-label">FIELD NOTE · {guide.data.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase()}</span>
+            <h3><a href={`/field-guide/${guide.id}/`}>{guide.data.title}</a></h3>
+            <p>{guide.data.description}</p>
+          </div>
+          <a class="read-link" href={`/field-guide/${guide.id}/`}>Read guide <span aria-hidden="true">↗</span></a>
+        </li>
+      ))}
+    </ol>
+  </section>
+</ProductLayout>
+
+<style>
+  .field-guide-hero {
+    display: grid;
+    min-height: 28rem;
+    align-items: end;
+  }
+
+  .field-guide-hero > div { max-width: 66rem; }
+
+  h1 {
+    max-width: 12ch;
+    margin: var(--space-3) 0 var(--space-4);
+  }
+
+  .field-guide-hero p {
+    max-width: 50rem;
+    margin-bottom: 0;
+    font-size: clamp(1.0625rem, 2vw, 1.35rem);
+  }
+
+  .index-heading {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: baseline;
+    margin-bottom: var(--space-5);
+  }
+
+  .index-heading h2 { margin: 0; }
+
+  ol {
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr) auto;
+    gap: var(--space-5);
+    align-items: start;
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .guide-number {
+    color: var(--line-strong);
+    font-family: var(--font-mono);
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    line-height: 0.85;
+  }
+
+  li h3 {
+    max-width: 24ch;
+    margin: var(--space-2) 0;
+    font-size: clamp(1.5rem, 2.7vw, 2.6rem);
+  }
+
+  li h3 a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  li h3 a:hover,
+  .read-link:hover { color: var(--cyan); }
+
+  li p {
+    max-width: 48rem;
+    margin-bottom: 0;
+  }
+
+  .read-link {
+    align-self: center;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 760px) {
+    .index-heading,
+    li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3);
+    }
+
+    .guide-number { font-size: 2rem; }
+    .read-link { justify-self: start; }
+  }
+</style>

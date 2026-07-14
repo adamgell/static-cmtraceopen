@@ -1,0 +1,27 @@
+---
+import { NAV_ITEMS, SITE } from "../data/site";
+
+interface Props {
+  productOrigin?: string;
+}
+
+const { productOrigin } = Astro.props;
+const productHref = (href: string) =>
+  productOrigin && href.startsWith("/") ? new URL(href, productOrigin).toString() : href;
+---
+
+<header>
+  <a href={productHref("/")} aria-label={`${SITE.name} home`}>
+    <img class="brand-mark" src="/images/cmtrace-logo.png" alt="" width="24" height="24" />
+    <span>{SITE.name}</span>
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      {NAV_ITEMS.map((item) => (
+        <li>
+          <a href={productHref(item.href)}>{item.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>

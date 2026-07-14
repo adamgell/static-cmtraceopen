@@ -1,0 +1,80 @@
+---
+import type { Workflow } from "../data/site";
+
+interface Props {
+  workflows: readonly Workflow[];
+}
+
+const { workflows } = Astro.props;
+---
+
+<ol class="workflow-rows">
+  {workflows.map((workflow, index) => (
+    <li class="editorial-row">
+      <div class="workflow-heading">
+        <span class="technical-label">{String(index + 1).padStart(2, "0")} · WORKFLOW</span>
+        <h3><a href={`/workflows/${workflow.slug}/`}>{workflow.label}</a></h3>
+      </div>
+      <div class="workflow-detail">
+        <p>{workflow.summary}</p>
+        <ul aria-label={`${workflow.label} evidence`}>
+          {workflow.evidence.map((item) => <li><code>{item}</code></li>)}
+        </ul>
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .workflow-rows {
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line-strong);
+    list-style: none;
+  }
+
+  .workflow-heading,
+  .workflow-detail {
+    min-width: 0;
+  }
+
+  h3 {
+    margin: var(--space-2) 0 0;
+    font-size: clamp(1.5rem, 2.7vw, 2.35rem);
+  }
+
+  h3 a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  h3 a:hover {
+    color: var(--cyan);
+  }
+
+  p {
+    max-width: 43rem;
+    margin-bottom: var(--space-4);
+    font-size: 1.0625rem;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  ul li {
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    line-height: 1.2;
+  }
+
+  code {
+    font-size: 0.75rem;
+  }
+</style>

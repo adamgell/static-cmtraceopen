@@ -1,0 +1,64 @@
+---
+import { SITE, WORKFLOWS } from "../../data/site";
+import ProductLayout from "../../layouts/ProductLayout.astro";
+
+const workflow = WORKFLOWS.find(({ slug }) => slug === "intune-app-delivery");
+if (!workflow) throw new Error("Missing workflow data: intune-app-delivery");
+const productDownload = `${SITE.download}?source=cmtraceopen-product`;
+const evidenceRoles = [
+  "Records the management extension’s check-in, policy cycle, and the high-level enforcement path on the device.",
+  "Shows application intent, applicability, detection, dependencies, content retrieval, and enforcement decisions.",
+  "Captures script or command execution, process output, exit behavior, and the handoff back to app enforcement.",
+] as const;
+---
+
+<ProductLayout
+  title="Intune application delivery — CMTrace Open"
+  description="Investigate Intune application detection, content staging, and installer execution across the endpoint evidence chain."
+  canonicalPath="/workflows/intune-app-delivery/"
+>
+  <section class="workflow-hero evidence-grid" aria-labelledby="workflow-heading">
+    <div>
+      <span class="technical-label">WORKFLOW 01 · FIELD INVESTIGATION</span>
+      <h1 id="workflow-heading">{workflow.label}.</h1>
+      <p>{workflow.summary}</p>
+    </div>
+  </section>
+
+  <section class="investigation section-rule" aria-labelledby="investigation-heading">
+    <div class="investigation-start">
+      <span class="technical-label">INVESTIGATION START</span>
+      <h2 id="investigation-heading">Start with the application’s last known state.</h2>
+      <p>Begin with one device, one application, and the time its state last changed. Establish whether Intune evaluated the assignment, staged the requested content, and handed execution to the installer before treating a portal status as the root cause.</p>
+    </div>
+    <ol class="evidence-list" aria-label={`${workflow.label} evidence sources`}>
+      {workflow.evidence.map((source, index) => (
+        <li>
+          <span class="technical-label">EVIDENCE {String(index + 1).padStart(2, "0")}</span>
+          <div><h3><code>{source}</code></h3><p>{evidenceRoles[index]}</p></div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="correlation evidence-grid section-rule" aria-labelledby="correlation-heading">
+    <div><span class="technical-label">WHAT CMTRACE OPEN CONNECTS</span><h2 id="correlation-heading">Follow one application from intent to exit code.</h2></div>
+    <div><p>CMTrace Open keeps evaluation, download, detection, and execution events in timestamp order so a stale detection result is not mistaken for a content failure, and an installer exit code is not separated from the policy decision that launched it.</p><a class="button button-primary" href={productDownload}>Open stable downloads</a></div>
+  </section>
+</ProductLayout>
+
+<style>
+  .workflow-hero { display: grid; min-height: 34rem; align-items: end; }
+  .workflow-hero > div { max-width: 66rem; }
+  h1 { max-width: 12ch; margin: var(--space-3) 0 var(--space-4); }
+  .workflow-hero p, .investigation-start p, .correlation p { max-width: 50rem; font-size: clamp(1.0625rem, 2vw, 1.35rem); }
+  .investigation, .correlation { display: grid; grid-template-columns: minmax(18rem, .75fr) minmax(0, 1.25fr); gap: var(--space-7); }
+  .investigation-start h2, .correlation h2 { max-width: 12ch; margin: var(--space-3) 0 var(--space-4); }
+  .evidence-list { margin: 0; padding: 0; border-top: 1px solid var(--line-strong); list-style: none; }
+  .evidence-list li { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--space-4); padding-block: var(--space-5); border-bottom: 1px solid var(--line); }
+  .evidence-list h3 { margin: 0 0 var(--space-2); font-size: clamp(1.25rem, 2.3vw, 2rem); }
+  .evidence-list p { margin: 0; }
+  .correlation p { margin-bottom: var(--space-5); }
+  @media (max-width: 900px) { .investigation, .correlation { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); } }
+  @media (max-width: 560px) { .evidence-list li { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); } }
+</style>

@@ -1,0 +1,22 @@
+# build output
+dist/
+
+# dependencies
+node_modules/
+
+# Astro
+.astro/
+
+# Cloudflare local runtime
+.wrangler/
+
+# test output
+playwright-report/
+test-results/
+
+# environment variables
+.env
+.env.production
+
+# macOS
+.DS_Store

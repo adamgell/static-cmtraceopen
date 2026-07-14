@@ -1,0 +1,61 @@
+---
+import "@fontsource-variable/archivo/index.css";
+import "@fontsource/ibm-plex-mono/500.css";
+import ProductFooter from "../components/ProductFooter.astro";
+import ProductHeader from "../components/ProductHeader.astro";
+import { SITE } from "../data/site";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  canonicalOrigin?: string;
+  productLinkOrigin?: string;
+  image?: string;
+  bodyClass?: string;
+}
+
+const { title, description, canonicalPath, canonicalOrigin = SITE.origin, productLinkOrigin, image, bodyClass } = Astro.props;
+const canonicalUrl = new URL(canonicalPath, canonicalOrigin).toString();
+const imageUrl = image ? new URL(image, SITE.origin).toString() : undefined;
+
+const softwareApplication = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "CMTrace Open",
+  applicationCategory: "DeveloperApplication",
+  operatingSystem: "Windows, macOS, Linux",
+  url: "https://cmtraceopen.com/",
+  downloadUrl: "https://download.cmtraceopen.com/",
+  codeRepository: "https://github.com/adamgell/cmtraceopen",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    {imageUrl && <meta property="og:image" content={imageUrl} />}
+    <script type="application/ld+json" set:html={JSON.stringify(softwareApplication)} is:inline />
+  </head>
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <ProductHeader productOrigin={productLinkOrigin} />
+    <main id="main-content">
+      <slot />
+    </main>
+    <ProductFooter productOrigin={productLinkOrigin} />
+  </body>
+</html>

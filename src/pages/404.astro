@@ -1,0 +1,61 @@
+---
+import ProductLayout from "../layouts/ProductLayout.astro";
+import { SITE } from "../data/site";
+
+const productHome = new URL("/", SITE.origin).toString();
+const productGuides = new URL("/field-guide/", SITE.origin).toString();
+---
+
+<ProductLayout
+  title="404 — CMTrace Open"
+  description="The requested CMTrace Open route could not be found. Return to the product or continue with the field guides."
+  canonicalPath="/404/"
+  productLinkOrigin={SITE.origin}
+>
+  <section class="not-found evidence-grid" aria-labelledby="not-found-heading">
+    <div>
+      <span class="technical-label">404 · SIGNAL NOT FOUND</span>
+      <h1 id="not-found-heading">This route dropped out of the timeline.</h1>
+      <p>The address does not match a CMTrace Open product, workflow, guide, or release route. The investigation can continue from a known surface.</p>
+      <div class="recovery-actions">
+        <a class="button button-primary" href={productHome}>Return to the product</a>
+        <a class="button button-secondary" href={productGuides}>Browse field guides</a>
+      </div>
+    </div>
+  </section>
+</ProductLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    min-height: min(48rem, calc(100vh - 72px));
+    align-items: center;
+  }
+
+  .not-found > div {
+    max-width: 68rem;
+  }
+
+  h1 {
+    max-width: 12ch;
+    margin: var(--space-3) 0 var(--space-4);
+  }
+
+  p {
+    max-width: 48rem;
+    margin-bottom: var(--space-5);
+    font-size: clamp(1.0625rem, 2vw, 1.35rem);
+  }
+
+  .recovery-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  @media (max-width: 640px) {
+    .recovery-actions {
+      display: grid;
+    }
+  }
+</style>

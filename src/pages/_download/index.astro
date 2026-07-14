@@ -1,0 +1,29 @@
+---
+import PackageChooser from "../../components/download/PackageChooser.astro";
+import ProductLayout from "../../layouts/ProductLayout.astro";
+import "../../styles/download.css";
+---
+
+<ProductLayout
+  title="Download CMTrace Open — Stable packages"
+  description="Choose the current stable CMTrace Open package for Windows, macOS, or Linux. GitHub remains the binary delivery origin."
+  canonicalPath="/"
+  canonicalOrigin="https://download.cmtraceopen.com"
+  productLinkOrigin="https://cmtraceopen.com"
+  bodyClass="download-surface"
+>
+  <PackageChooser />
+
+  <section class="nightly-panel" aria-labelledby="nightly-heading">
+    <span class="technical-label">NEED THE NEWEST BUILD?</span>
+    <div>
+      <h2 id="nightly-heading">Nightlies stay in their own channel.</h2>
+      <p>Development builds and their publication status remain on the dedicated nightly page.</p>
+    </div>
+    <a class="button button-secondary" href="https://cmtraceopen.com/nightly/">Open nightly builds</a>
+  </section>
+
+  <script>
+    import "../../scripts/download-center";
+  </script>
+</ProductLayout>

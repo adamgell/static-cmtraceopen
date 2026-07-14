@@ -1,0 +1,72 @@
+---
+import ProductLayout from "../layouts/ProductLayout.astro";
+import "../styles/nightly.css";
+---
+
+<ProductLayout
+  title="Nightly builds — CMTrace Open"
+  description="Test signed CMTrace Open development packages published from the latest successful nightly workflow."
+  canonicalPath="/nightly/"
+>
+  <section class="nightly-hero evidence-grid" aria-labelledby="nightly-heading">
+    <div class="nightly-copy">
+      <span class="technical-label">NIGHTLY CHANNEL · DEVELOPMENT BUILDS</span>
+      <h1 id="nightly-heading">Builds from main, ready for testing.</h1>
+      <p>Signed development packages from the latest successful nightly workflow. Expect change; use the stable channel for production endpoints.</p>
+    </div>
+    <aside class="channel-note" aria-label="Nightly channel guidance">
+      <span class="technical-label">CHANNEL CONTRACT</span>
+      <strong>Fresh code. Short shelf life.</strong>
+      <p>The mutable nightly release is replaced as main advances. These files are for validation, not managed production rollout.</p>
+    </aside>
+  </section>
+
+  <section class="nightly-builds section-rule" aria-labelledby="nightly-builds-heading">
+    <div class="build-heading">
+      <div>
+        <span class="technical-label">CURRENT NIGHTLY SIGNAL</span>
+        <h2 id="nightly-builds-heading" data-nightly-title>Reading the build record.</h2>
+      </div>
+      <button class="refresh-control" type="button" data-nightly-refresh>Refresh build data</button>
+    </div>
+
+    <dl class="nightly-readout" aria-label="Current nightly release">
+      <div>
+        <dt>Build</dt>
+        <dd data-nightly-build>Discovering…</dd>
+      </div>
+      <div>
+        <dt>Published</dt>
+        <dd data-nightly-date>Checking GitHub</dd>
+      </div>
+      <div>
+        <dt>Packages</dt>
+        <dd data-nightly-count>Inspecting assets</dd>
+      </div>
+      <div>
+        <dt>Total size</dt>
+        <dd data-nightly-size>Calculating</dd>
+      </div>
+    </dl>
+
+    <p class="nightly-status" data-nightly-status role="status">Loading the current nightly release…</p>
+    <div class="nightly-groups" data-nightly-groups></div>
+
+    <noscript>
+      <p class="nightly-error">Nightly discovery requires JavaScript. <a href="https://github.com/adamgell/cmtraceopen/releases/tag/nightly">Open the nightly release on GitHub</a>.</p>
+    </noscript>
+  </section>
+
+  <section class="stable-handoff" aria-labelledby="stable-heading">
+    <span class="technical-label">NEED THE SUPPORTED CHANNEL?</span>
+    <div>
+      <h2 id="stable-heading">Use stable for production endpoints.</h2>
+      <p>Choose the current supported package for normal use and managed deployment.</p>
+    </div>
+    <a class="button button-primary" href="https://download.cmtraceopen.com/?source=nightly-builds-page">Open stable downloads</a>
+  </section>
+
+  <script>
+    import "../scripts/nightly";
+  </script>
+</ProductLayout>

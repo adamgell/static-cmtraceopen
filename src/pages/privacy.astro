@@ -1,0 +1,98 @@
+---
+import { PRIVACY_STATEMENT } from "../data/site";
+import ProductLayout from "../layouts/ProductLayout.astro";
+---
+
+<ProductLayout
+  title="Privacy — CMTrace Open"
+  description="The plain-language privacy boundary for the CMTrace Open app, GitHub release counters, and the future download website."
+  canonicalPath="/privacy/"
+>
+  <section class="resource-hero evidence-grid" aria-labelledby="privacy-heading">
+    <div>
+      <span class="technical-label">PRIVACY CONTRACT · THREE SURFACES</span>
+      <h1 id="privacy-heading">No runtime telemetry.</h1>
+      <p>CMTrace Open keeps the application boundary simple: your investigation stays on your device.</p>
+    </div>
+  </section>
+
+  <section class="privacy-contract section-rule" aria-labelledby="contract-heading">
+    <div class="contract-intro">
+      <span class="technical-label">THE COMPLETE STATEMENT</span>
+      <h2 id="contract-heading">What is collected, where, and by whom.</h2>
+      <p class="statement">{PRIVACY_STATEMENT}</p>
+    </div>
+
+    <ol class="surface-list">
+      <li>
+        <span class="technical-label">SURFACE 01 · RUNNING APP</span>
+        <h3>The app sends nothing about how you use it.</h3>
+        <p>No analytics, usage, device, crash, identity, or behavioral telemetry leaves the running application.</p>
+      </li>
+      <li>
+        <span class="technical-label">SURFACE 02 · GITHUB RELEASES</span>
+        <h3>GitHub reports aggregate release activity.</h3>
+        <p>GitHub provides cumulative aggregate asset request counts for files published with a release.</p>
+      </li>
+      <li>
+        <span class="technical-label">SURFACE 03 · FUTURE DOWNLOAD WEBSITE</span>
+        <h3>Link selections may be counted, not identified.</h3>
+        <p>The future download website may record aggregate link selections without storing IP addresses, user-agent strings, cookies, fingerprints, full referrers, or persistent identifiers.</p>
+      </li>
+    </ol>
+  </section>
+</ProductLayout>
+
+<style>
+  .resource-hero {
+    display: grid;
+    min-height: 30rem;
+    align-items: end;
+  }
+
+  .resource-hero > div,
+  .contract-intro {
+    max-width: 58rem;
+  }
+
+  h1 {
+    max-width: 10ch;
+    margin: var(--space-3) 0 var(--space-4);
+  }
+
+  .resource-hero p,
+  .statement {
+    font-size: clamp(1.0625rem, 2vw, 1.35rem);
+  }
+
+  .surface-list {
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+  }
+
+  .surface-list li {
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.65fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-5);
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .surface-list h3,
+  .surface-list p {
+    margin: 0;
+  }
+
+  .surface-list h3 {
+    font-size: clamp(1.3rem, 2.2vw, 2rem);
+  }
+
+  @media (max-width: 900px) {
+    .surface-list li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3);
+    }
+  }
+</style>

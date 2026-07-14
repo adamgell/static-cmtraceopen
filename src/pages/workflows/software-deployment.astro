@@ -1,0 +1,38 @@
+---
+import { SITE, WORKFLOWS } from "../../data/site";
+import ProductLayout from "../../layouts/ProductLayout.astro";
+
+const workflow = WORKFLOWS.find(({ slug }) => slug === "software-deployment");
+if (!workflow) throw new Error("Missing workflow data: software-deployment");
+const productDownload = `${SITE.download}?source=cmtraceopen-product`;
+const evidenceRoles = [
+  "Exposes Windows Installer actions, property changes, source resolution, return values, and rollback inside the MSI transaction.",
+  "Explains wrapper decisions, prerequisites, process handling, user-session behavior, and the command sent to the installer.",
+  "Tracks bootstrapper planning, package-chain application, cached payloads, and the bundle result around one or more installers.",
+] as const;
+---
+
+<ProductLayout title="Software deployment — CMTrace Open" description="Investigate MSI, PSADT, and WiX Burn deployment evidence from wrapper decisions through package-engine results." canonicalPath="/workflows/software-deployment/">
+  <section class="workflow-hero evidence-grid" aria-labelledby="workflow-heading"><div><span class="technical-label">WORKFLOW 03 · FIELD INVESTIGATION</span><h1 id="workflow-heading">{workflow.label}.</h1><p>{workflow.summary}</p></div></section>
+  <section class="investigation section-rule" aria-labelledby="investigation-heading">
+    <div class="investigation-start"><span class="technical-label">INVESTIGATION START</span><h2 id="investigation-heading">Start with the exact package attempt.</h2><p>Begin with the deployment version, command line, execution context, and the first observed failure time. Identify which layer actually returned the result before changing detection logic, retrying the wrapper, or blaming the package engine.</p></div>
+    <ol class="evidence-list" aria-label={`${workflow.label} evidence sources`}>{workflow.evidence.map((source, index) => (<li><span class="technical-label">EVIDENCE {String(index + 1).padStart(2, "0")}</span><div><h3><code>{source}</code></h3><p>{evidenceRoles[index]}</p></div></li>))}</ol>
+  </section>
+  <section class="correlation evidence-grid section-rule" aria-labelledby="correlation-heading"><div><span class="technical-label">WHAT CMTRACE OPEN CONNECTS</span><h2 id="correlation-heading">Trace the wrapper into the package engine.</h2></div><div><p>CMTrace Open aligns PSADT orchestration and WiX Burn chain activity with MSI action records, revealing whether the failure began in wrapper logic, bootstrapper planning, payload acquisition, or the underlying installer transaction.</p><a class="button button-primary" href={productDownload}>Open stable downloads</a></div></section>
+</ProductLayout>
+
+<style>
+  .workflow-hero { display: grid; min-height: 34rem; align-items: end; }
+  .workflow-hero > div { max-width: 66rem; }
+  h1 { max-width: 12ch; margin: var(--space-3) 0 var(--space-4); }
+  .workflow-hero p, .investigation-start p, .correlation p { max-width: 50rem; font-size: clamp(1.0625rem, 2vw, 1.35rem); }
+  .investigation, .correlation { display: grid; grid-template-columns: minmax(18rem, .75fr) minmax(0, 1.25fr); gap: var(--space-7); }
+  .investigation-start h2, .correlation h2 { max-width: 12ch; margin: var(--space-3) 0 var(--space-4); }
+  .evidence-list { margin: 0; padding: 0; border-top: 1px solid var(--line-strong); list-style: none; }
+  .evidence-list li { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--space-4); padding-block: var(--space-5); border-bottom: 1px solid var(--line); }
+  .evidence-list h3 { margin: 0 0 var(--space-2); font-size: clamp(1.25rem, 2.3vw, 2rem); }
+  .evidence-list p { margin: 0; }
+  .correlation p { margin-bottom: var(--space-5); }
+  @media (max-width: 900px) { .investigation, .correlation { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); } }
+  @media (max-width: 560px) { .evidence-list li { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); } }
+</style>

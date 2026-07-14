@@ -1,0 +1,70 @@
+<ol class="incident-timeline" aria-label="Correlated Intune application incident">
+  <li>
+    <span class="technical-label">01 · DETECTED</span>
+    <strong>Application discovered</strong>
+    <code>IntuneManagementExtension.log</code>
+  </li>
+  <li>
+    <span class="technical-label">02 · STAGED</span>
+    <strong>Content downloaded</strong>
+    <code>AppWorkload.log</code>
+  </li>
+  <li class="failure-event">
+    <span class="technical-label">03 · FAILED</span>
+    <strong>Installer returned failure</strong>
+    <code>AgentExecutor.log</code>
+  </li>
+  <li class="correlated-event">
+    <span class="technical-label">04 · CORRELATED</span>
+    <strong>One correlated incident</strong>
+    <span>Detection, staging, execution, and failure evidence stay in sequence.</span>
+  </li>
+</ol>
+
+<style>
+  .incident-timeline {
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line-strong);
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: minmax(9.5rem, 0.55fr) minmax(12rem, 0.85fr) minmax(0, 1.2fr);
+    gap: var(--space-4);
+    align-items: baseline;
+    min-width: 0;
+    padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  strong {
+    color: var(--text);
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    line-height: 1.25;
+  }
+
+  code,
+  li > span:last-child {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+
+  .failure-event .technical-label {
+    color: var(--failure);
+  }
+
+  .correlated-event {
+    border-bottom-color: var(--cyan);
+    background: linear-gradient(90deg, rgb(77 229 220 / 7%), transparent 70%);
+  }
+
+  @media (max-width: 760px) {
+    li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-2);
+    }
+  }
+</style>

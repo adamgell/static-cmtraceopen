@@ -1,0 +1,35 @@
+---
+import { SITE } from "../data/site";
+
+interface Props {
+  productOrigin?: string;
+}
+
+const { productOrigin } = Astro.props;
+const productHref = (href: string) =>
+  productOrigin && href.startsWith("/") ? new URL(href, productOrigin).toString() : href;
+
+const productDownload = `${SITE.download}?source=cmtraceopen-product`;
+
+const footerLinks = [
+  { label: "Product", href: "/" },
+  { label: "Download", href: productDownload },
+  { label: "Nightly", href: SITE.nightly },
+  { label: "Field Guide", href: "/field-guide/" },
+  { label: "GitHub", href: SITE.repository },
+  { label: "Privacy", href: "/privacy/" },
+] as const;
+---
+
+<footer>
+  <nav aria-label="Footer">
+    <ul>
+      {footerLinks.map((item) => (
+        <li>
+          <a href={productHref(item.href)}>{item.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <p>&copy; {new Date().getFullYear()} {SITE.name}</p>
+</footer>
