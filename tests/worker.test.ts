@@ -280,6 +280,28 @@ describe("nightly release API", () => {
     });
     expectSecurityHeaders(response);
   });
+
+  it("uses the optional GitHub token only as an API authorization header", async () => {
+    const { env } = environment();
+    const token = "test-token-that-must-stay-private";
+    (env as Env & { GITHUB_TOKEN?: string }).GITHUB_TOKEN = token;
+    const fetcher = vi.fn(async () => Response.json(NIGHTLY_RELEASE));
+
+    const response = await handleRequest(
+      new Request("https://product.localhost:8642/api/releases/nightly"),
+      env,
+      fetcher as unknown as typeof fetch,
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenCalledOnce();
+    const [input, init] = fetcher.mock.calls[0];
+    expect(String(input)).toBe(
+      "https://api.github.com/repos/adamgell/cmtraceopen/releases/tags/nightly",
+    );
+    expect(new Headers(init?.headers).get("Authorization")).toBe(`Bearer ${token}`);
+    expect(await response.text()).not.toContain(token);
+  });
 });
 
 describe("verified asset redirects", () => {

@@ -9,6 +9,10 @@ import {
 
 export type Surface = "product" | "download" | "unknown";
 
+type RuntimeEnv = Env & {
+  GITHUB_TOKEN?: string;
+};
+
 const PRODUCT_HOSTS = new Set([
   "cmtraceopen.com",
   "www.cmtraceopen.com",
@@ -69,6 +73,31 @@ function requestAt(request: Request, pathname: string): Request {
   const url = new URL(request.url);
   url.pathname = pathname;
   return new Request(url, request);
+}
+
+function githubFetcher(env: RuntimeEnv, fetcher: typeof fetch): typeof fetch {
+  const token = env.GITHUB_TOKEN?.trim();
+  if (!token) return fetcher;
+
+  return ((input: RequestInfo | URL, init?: RequestInit) => {
+    const requestUrl = new URL(input instanceof Request ? input.url : String(input));
+    if (
+      requestUrl.protocol !== "https:" ||
+      requestUrl.hostname !== "api.github.com" ||
+      requestUrl.port !== "" ||
+      requestUrl.username !== "" ||
+      requestUrl.password !== ""
+    ) {
+      return fetcher(input, init);
+    }
+
+    const headers = new Headers(input instanceof Request ? input.headers : undefined);
+    for (const [name, value] of new Headers(init?.headers)) {
+      headers.set(name, value);
+    }
+    headers.set("Authorization", `Bearer ${token}`);
+    return fetcher(input, { ...init, headers });
+  }) as typeof fetch;
 }
 
 async function brandedNotFound(request: Request, env: Env): Promise<Response> {
@@ -164,9 +193,10 @@ export async function handleRequest(
 ): Promise<Response> {
   const url = new URL(request.url);
   const surface = surfaceFor(url.hostname);
+  const releaseFetcher = githubFetcher(env, fetcher);
 
-  if (surface === "product") return handleProduct(request, env, url, fetcher);
-  if (surface === "download") return handleDownload(request, env, url, fetcher);
+  if (surface === "product") return handleProduct(request, env, url, releaseFetcher);
+  if (surface === "download") return handleDownload(request, env, url, releaseFetcher);
   return secure(new Response("Misdirected request", { status: 421 }));
 }
 
