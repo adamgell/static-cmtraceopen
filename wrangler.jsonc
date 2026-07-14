@@ -3,6 +3,11 @@
   "name": "static-cmtraceopen",
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-07-13",
+  "routes": [
+    { "pattern": "cmtraceopen.com", "custom_domain": true },
+    { "pattern": "www.cmtraceopen.com", "custom_domain": true },
+    { "pattern": "download.cmtraceopen.com", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
