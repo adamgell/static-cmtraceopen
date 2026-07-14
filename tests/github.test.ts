@@ -265,6 +265,17 @@ describe("getNightlyRelease", () => {
     const fetcher = asFetcher(async () => responseJson(rawNightlyRelease(overrides)));
     await expect(getNightlyRelease(requestFor(`reject-nightly-${String(_label).replaceAll(" ", "-")}`), fetcher)).rejects.toThrow(/nightly/i);
   });
+
+  it("serves repeated nightly checks from the Worker cache", async () => {
+    const fetcher = asFetcher(async () => responseJson(rawNightlyRelease()));
+    const request = requestFor("cache-nightly-success");
+
+    const first = await getNightlyRelease(request, fetcher);
+    const second = await getNightlyRelease(request, fetcher);
+
+    expect(second).toEqual(first);
+    expect(fetcher).toHaveBeenCalledOnce();
+  });
 });
 
 describe("getVerifiedAsset", () => {

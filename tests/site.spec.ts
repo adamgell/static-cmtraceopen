@@ -205,7 +205,10 @@ test("nightly page presents live development packages in the product design syst
   await page.goto("/nightly/");
 
   await expect(page.getByRole("heading", { level: 1, name: "Builds from main, ready for testing." })).toBeVisible();
-  await expect(page.getByText("Nightly is published.")).toBeVisible();
+  await expect(page.getByText("Nightly is published.")).toHaveCount(0);
+  await expect(page.getByText("Choose a development package below.")).toHaveCount(0);
+  await expect(page.getByText("9 human packages")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Refresh build data" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Download Windows x64 portable" })).toHaveAttribute(
     "href",
     "https://download.cmtraceopen.com/nightly-asset/475898689?source=nightly-builds-page",
@@ -220,6 +223,37 @@ test("nightly page presents live development packages in the product design syst
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();
   expect(results.violations).toEqual([]);
+});
+
+test("nightly refresh requests and renders newer build data", async ({ page }) => {
+  let requestCount = 0;
+  const refreshedRelease = {
+    ...nightlyRelease,
+    publishedAt: "2026-07-14T12:00:00Z",
+    assets: nightlyRelease.assets.map((asset) => ({
+      ...asset,
+      name: asset.name.replace("_75_efb9803c9f91", "_76_deadbeef1234"),
+    })),
+  };
+  await page.route("**/api/releases/nightly", (route) => {
+    requestCount += 1;
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(requestCount === 1 ? nightlyRelease : refreshedRelease),
+    });
+  });
+
+  await page.goto("/nightly/");
+  await expect(page.getByText(/CMTrace-Open-Lite_Nightly_20260713_75_efb9803c9f91_x64\.exe/)).toBeVisible();
+  await page.getByRole("button", { name: "Refresh build data" }).click();
+
+  await expect(page.getByText(/CMTrace-Open-Lite_Nightly_20260713_76_deadbeef1234_x64\.exe/)).toBeVisible();
+  const refreshButton = page.getByRole("button", { name: "Refresh available in 2 minutes" });
+  await expect(refreshButton).toBeDisabled();
+  await page.evaluate(() => document.querySelector<HTMLButtonElement>("[data-nightly-refresh]")?.click());
+  await page.waitForTimeout(100);
+  expect(requestCount).toBe(2);
 });
 
 test("narrow layout does not overflow", async ({ page }) => {

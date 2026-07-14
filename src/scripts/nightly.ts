@@ -19,16 +19,13 @@ type NightlyRelease = {
   assets: NightlyAsset[];
 };
 
-const title = document.querySelector<HTMLElement>("[data-nightly-title]");
-const build = document.querySelector<HTMLElement>("[data-nightly-build]");
-const date = document.querySelector<HTMLElement>("[data-nightly-date]");
-const count = document.querySelector<HTMLElement>("[data-nightly-count]");
-const size = document.querySelector<HTMLElement>("[data-nightly-size]");
-const status = document.querySelector<HTMLElement>("[data-nightly-status]");
 const groups = document.querySelector<HTMLElement>("[data-nightly-groups]");
 const refresh = document.querySelector<HTMLButtonElement>("[data-nightly-refresh]");
 
 const groupOrder = ["Windows x64", "Windows ARM64", "macOS ARM64", "Linux x64"];
+const refreshLabel = "Refresh build data";
+const refreshCooldownMs = 120_000;
+let refreshCooldown: number | undefined;
 
 function isNightlyRelease(value: unknown): value is NightlyRelease {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
@@ -91,21 +88,9 @@ function packageDetail(asset: NightlyAsset): string {
   return "Development package.";
 }
 
-function buildLabel(release: NightlyRelease): string {
-  const match = release.assets.map((asset) => /Nightly_(\d{8})_(\d+)_([0-9a-f]+)/i.exec(asset.name)).find(Boolean);
-  return match ? `Run ${match[2]} · ${match[3].slice(0, 12)}` : release.name;
-}
-
 function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) return "Size unavailable";
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatDate(value: string): string {
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime())
-    ? "Publication time unavailable"
-    : new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(parsed);
 }
 
 function element<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, text?: string): HTMLElementTagNameMap[K] {
@@ -140,12 +125,6 @@ function renderRelease(release: NightlyRelease): void {
     grouped.set(name, [...(grouped.get(name) ?? []), asset]);
   }
 
-  if (title) title.textContent = "Nightly is published.";
-  if (build) build.textContent = buildLabel(release);
-  if (date) date.textContent = formatDate(release.publishedAt);
-  if (count) count.textContent = `${assets.length} human packages`;
-  if (size) size.textContent = formatBytes(assets.reduce((total, asset) => total + asset.size, 0));
-  if (status) status.textContent = assets.length > 0 ? "Choose a development package below." : "The release is published without human-downloadable packages.";
   if (!groups) return;
 
   groups.replaceChildren();
@@ -169,12 +148,10 @@ function renderRelease(release: NightlyRelease): void {
 }
 
 function renderError(message: string): void {
-  if (title) title.textContent = "Nightly signal unavailable.";
-  if (status) status.textContent = message;
   if (groups) {
     const error = element("div", "nightly-error");
     error.appendChild(element("h3", undefined, "Could not load the current nightly release."));
-    const copy = element("p", undefined, "No package was selected or counted. You can inspect the nightly workflow directly on GitHub.");
+    const copy = element("p", undefined, `${message} You can inspect the nightly workflow directly on GitHub.`);
     const link = element("a", undefined, "Open nightly workflow ↗");
     link.href = "https://github.com/adamgell/cmtraceopen/actions/workflows/cmtrace-nightly-signed.yml";
     error.appendChild(copy);
@@ -183,9 +160,20 @@ function renderError(message: string): void {
   }
 }
 
-async function loadNightly(): Promise<void> {
+function startRefreshCooldown(): void {
+  if (!refresh) return;
+  if (refreshCooldown !== undefined) window.clearTimeout(refreshCooldown);
+  refresh.disabled = true;
+  refresh.textContent = "Refresh available in 2 minutes";
+  refreshCooldown = window.setTimeout(() => {
+    refresh.disabled = false;
+    refresh.textContent = refreshLabel;
+    refreshCooldown = undefined;
+  }, refreshCooldownMs);
+}
+
+async function loadNightly(manualRefresh = false): Promise<void> {
   if (refresh) refresh.disabled = true;
-  if (status) status.textContent = "Loading the current nightly release…";
   try {
     const response = await fetch("/api/releases/nightly", { headers: { Accept: "application/json" } });
     if (!response.ok) throw new Error("GitHub release discovery is temporarily unavailable.");
@@ -195,9 +183,10 @@ async function loadNightly(): Promise<void> {
   } catch (error) {
     renderError(error instanceof Error ? error.message : "Nightly release discovery failed.");
   } finally {
-    if (refresh) refresh.disabled = false;
+    if (manualRefresh) startRefreshCooldown();
+    else if (refresh) refresh.disabled = false;
   }
 }
 
-refresh?.addEventListener("click", () => void loadNightly());
+refresh?.addEventListener("click", () => void loadNightly(true));
 void loadNightly();

@@ -40,20 +40,10 @@
   font-size: 0.9rem;
 }
 
-.build-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.build-heading h2 {
-  max-width: 13ch;
-  margin: var(--space-3) 0 0;
-}
-
 .refresh-control {
+  width: 100%;
   min-height: 44px;
+  margin-top: var(--space-4);
   border: 1px solid var(--line-strong);
   padding: 0.7rem 1rem;
   background: transparent;
@@ -73,47 +63,6 @@
 .refresh-control:disabled {
   cursor: progress;
   opacity: 0.55;
-}
-
-.nightly-readout {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: var(--space-5) 0 0;
-  border-top: 1px solid var(--line-strong);
-  border-bottom: 1px solid var(--line);
-}
-
-.nightly-readout div {
-  min-width: 0;
-  padding: var(--space-3);
-  border-right: 1px solid var(--line);
-}
-
-.nightly-readout div:first-child { padding-left: 0; }
-.nightly-readout div:last-child { border-right: 0; }
-
-.nightly-readout dt,
-.nightly-readout dd {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  overflow-wrap: anywhere;
-}
-
-.nightly-readout dt {
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.nightly-readout dd {
-  margin-top: var(--space-1);
-  color: var(--text);
-}
-
-.nightly-status {
-  margin: var(--space-4) 0;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
 }
 
 .nightly-groups {
@@ -204,23 +153,13 @@
     border-bottom: 1px solid var(--line);
   }
 
-  .nightly-readout {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .nightly-readout div:nth-child(2) { border-right: 0; }
-  .nightly-readout div:nth-child(-n + 2) { border-bottom: 1px solid var(--line); }
 }
 
 @media (max-width: 600px) {
-  .build-heading,
   .nightly-package {
     align-items: stretch;
-    flex-direction: column;
     grid-template-columns: minmax(0, 1fr);
   }
-
-  .build-heading { display: flex; }
 
   .refresh-control,
   .nightly-package .button,
@@ -228,17 +167,4 @@
     width: 100%;
     min-width: 0;
   }
-
-  .nightly-readout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .nightly-readout div,
-  .nightly-readout div:first-child {
-    padding-inline: 0;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .nightly-readout div:last-child { border-bottom: 0; }
 }

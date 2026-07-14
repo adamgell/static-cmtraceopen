@@ -18,38 +18,11 @@ import "../styles/nightly.css";
       <span class="technical-label">CHANNEL CONTRACT</span>
       <strong>Fresh code. Short shelf life.</strong>
       <p>The mutable nightly release is replaced as main advances. These files are for validation, not managed production rollout.</p>
+      <button class="refresh-control" type="button" data-nightly-refresh>Refresh build data</button>
     </aside>
   </section>
 
-  <section class="nightly-builds section-rule" aria-labelledby="nightly-builds-heading">
-    <div class="build-heading">
-      <div>
-        <span class="technical-label">CURRENT NIGHTLY SIGNAL</span>
-        <h2 id="nightly-builds-heading" data-nightly-title>Reading the build record.</h2>
-      </div>
-      <button class="refresh-control" type="button" data-nightly-refresh>Refresh build data</button>
-    </div>
-
-    <dl class="nightly-readout" aria-label="Current nightly release">
-      <div>
-        <dt>Build</dt>
-        <dd data-nightly-build>Discovering…</dd>
-      </div>
-      <div>
-        <dt>Published</dt>
-        <dd data-nightly-date>Checking GitHub</dd>
-      </div>
-      <div>
-        <dt>Packages</dt>
-        <dd data-nightly-count>Inspecting assets</dd>
-      </div>
-      <div>
-        <dt>Total size</dt>
-        <dd data-nightly-size>Calculating</dd>
-      </div>
-    </dl>
-
-    <p class="nightly-status" data-nightly-status role="status">Loading the current nightly release…</p>
+  <section class="nightly-builds section-rule" aria-label="Nightly packages">
     <div class="nightly-groups" data-nightly-groups></div>
 
     <noscript>
