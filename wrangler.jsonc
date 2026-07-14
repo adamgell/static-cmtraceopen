@@ -4,8 +4,8 @@
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-07-13",
   "routes": [
-    { "pattern": "cmtraceopen.com", "custom_domain": true },
-    { "pattern": "www.cmtraceopen.com", "custom_domain": true },
+    { "pattern": "cmtraceopen.com/*", "zone_name": "cmtraceopen.com" },
+    { "pattern": "www.cmtraceopen.com/*", "zone_name": "cmtraceopen.com" },
     { "pattern": "download.cmtraceopen.com", "custom_domain": true }
   ],
   "assets": {
