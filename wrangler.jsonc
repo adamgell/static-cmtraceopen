@@ -3,6 +3,8 @@
   "name": "static-cmtraceopen",
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-07-13",
+  "workers_dev": true,
+  "preview_urls": true,
   "routes": [
     { "pattern": "cmtraceopen.com/*", "zone_name": "cmtraceopen.com" },
     { "pattern": "www.cmtraceopen.com/*", "zone_name": "cmtraceopen.com" },
