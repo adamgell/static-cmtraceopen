@@ -12,6 +12,7 @@ export type Surface = "product" | "download" | "unknown";
 const PRODUCT_HOSTS = new Set([
   "cmtraceopen.com",
   "www.cmtraceopen.com",
+  "static-cmtraceopen.acgell9959032.workers.dev",
   "localhost",
   "product.localhost",
 ]);

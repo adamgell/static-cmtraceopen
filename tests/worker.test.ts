@@ -196,6 +196,17 @@ describe("hostname and static surface routing", () => {
     expectSecurityHeaders(response);
   });
 
+  it("serves the product from the exact Cloudflare preview hostname", async () => {
+    const { env, assets } = environment();
+    const request = new Request("https://static-cmtraceopen.acgell9959032.workers.dev/");
+
+    const response = await handleRequest(request, env);
+
+    expect(response.status).toBe(200);
+    expect((assets.mock.calls[0][0] as Request).url).toBe(request.url);
+    expectSecurityHeaders(response);
+  });
+
   it("returns 421 for an unknown URL hostname without consulting request headers", async () => {
     const { env, assets } = environment();
     const request = new Request("https://unknown.example/", {
