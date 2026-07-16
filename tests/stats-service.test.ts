@@ -80,6 +80,18 @@ function cacheWith(initial?: PublicStats) {
   return { cache, stored: () => stored?.clone() };
 }
 
+function keyedCache() {
+  const stored = new Map<string, Response>();
+  const cache = {
+    match: vi.fn(async (request: Request) => stored.get(request.url)?.clone()),
+    put: vi.fn(async (request: Request, response: Response) => {
+      stored.set(request.url, response.clone());
+    }),
+  };
+  vi.spyOn(caches, "open").mockResolvedValue(cache as unknown as Cache);
+  return { cache, stored };
+}
+
 beforeEach(() => {
   vi.mocked(readGithubStats).mockResolvedValue(GITHUB);
   vi.mocked(readSelectionStats).mockResolvedValue(SELECTIONS);
@@ -133,6 +145,105 @@ describe("getPublicStats", () => {
     expect(readGithubStats).not.toHaveBeenCalled();
     expect(readSelectionStats).not.toHaveBeenCalled();
     expect(cache.put).not.toHaveBeenCalled();
+  });
+
+  it("shares one canonical cache entry across apex, www, and preview hosts", async () => {
+    const { cache, stored } = keyedCache();
+    const requests = [
+      new Request("https://cmtraceopen.com/api/stats"),
+      new Request("https://www.cmtraceopen.com/api/stats"),
+      new Request("https://preview-42.pages.dev/api/stats"),
+    ];
+
+    const first = await getPublicStats(requests[0], CONFIG, DEPENDENCIES);
+    const second = await getPublicStats(requests[1], CONFIG, DEPENDENCIES);
+    const third = await getPublicStats(requests[2], CONFIG, DEPENDENCIES);
+
+    expect(second).toEqual(first);
+    expect(third).toEqual(first);
+    expect(readGithubStats).toHaveBeenCalledOnce();
+    expect(readSelectionStats).toHaveBeenCalledOnce();
+    expect(stored.size).toBe(1);
+    const cacheUrls = [
+      ...vi.mocked(cache.match).mock.calls.map(([request]) => request.url),
+      ...vi.mocked(cache.put).mock.calls.map(([request]) => request.url),
+    ];
+    expect(new Set(cacheUrls)).toEqual(
+      new Set(["https://stats-cache.invalid/public-stats"]),
+    );
+  });
+
+  it("refreshes successfully when opening the cache rejects", async () => {
+    vi.spyOn(caches, "open").mockRejectedValue(new Error("cache unavailable"));
+
+    const result = await getPublicStats(REQUEST, CONFIG, DEPENDENCIES);
+
+    expect(result.status).toBe(200);
+    expect(result.stats.github.status).toBe("fresh");
+    expect(result.stats.selections.status).toBe("fresh");
+  });
+
+  it("refreshes successfully when reading the cache rejects", async () => {
+    const cache = {
+      match: vi.fn(async () => {
+        throw new Error("cache read failed");
+      }),
+      put: vi.fn(async () => undefined),
+    };
+    vi.spyOn(caches, "open").mockResolvedValue(cache as unknown as Cache);
+
+    const result = await getPublicStats(REQUEST, CONFIG, DEPENDENCIES);
+
+    expect(result.status).toBe(200);
+    expect(result.stats.github.status).toBe("fresh");
+    expect(cache.put).toHaveBeenCalledOnce();
+  });
+
+  it("refreshes successfully when cached JSON is malformed", async () => {
+    const cache = {
+      match: vi.fn(async () =>
+        new Response("{not-json", {
+          headers: { "Content-Type": "application/json" },
+        })),
+      put: vi.fn(async () => undefined),
+    };
+    vi.spyOn(caches, "open").mockResolvedValue(cache as unknown as Cache);
+
+    const result = await getPublicStats(REQUEST, CONFIG, DEPENDENCIES);
+
+    expect(result.status).toBe(200);
+    expect(result.stats.github.status).toBe("fresh");
+    expect(result.stats.selections.status).toBe("fresh");
+  });
+
+  it("refreshes successfully when cached JSON has an invalid stats shape", async () => {
+    const cache = {
+      match: vi.fn(async () => Response.json({ generatedAt: NOW.toISOString() })),
+      put: vi.fn(async () => undefined),
+    };
+    vi.spyOn(caches, "open").mockResolvedValue(cache as unknown as Cache);
+
+    const result = await getPublicStats(REQUEST, CONFIG, DEPENDENCIES);
+
+    expect(result.status).toBe(200);
+    expect(result.stats.github.status).toBe("fresh");
+    expect(result.stats.selections.status).toBe("fresh");
+  });
+
+  it("returns refreshed provider data when writing the cache rejects", async () => {
+    const cache = {
+      match: vi.fn(async () => undefined),
+      put: vi.fn(async () => {
+        throw new Error("cache write failed");
+      }),
+    };
+    vi.spyOn(caches, "open").mockResolvedValue(cache as unknown as Cache);
+
+    const result = await getPublicStats(REQUEST, CONFIG, DEPENDENCIES);
+
+    expect(result.status).toBe(200);
+    expect(result.stats.github.status).toBe("fresh");
+    expect(result.stats.selections.status).toBe("fresh");
   });
 
   it("drops cached stale provider data older than 24 hours on the fresh-cache path", async () => {

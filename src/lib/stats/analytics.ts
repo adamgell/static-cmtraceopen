@@ -15,7 +15,10 @@ const ANALYTICS_QUERY = `SELECT
   SUM(_sample_interval * double1) AS selections
 FROM cmtraceopen_download_events
 WHERE timestamp >= NOW() - INTERVAL '30' DAY
-  AND blob9 != 'unknown'
+  AND blob3 IN ('stable', 'nightly')
+  AND blob5 IN ('windows', 'macos', 'linux')
+  AND blob8 IN ('manual-only', 'mixed-manual-update')
+  AND blob9 IN ('download-home', 'github-readme', 'github-release', 'cmtraceopen-product', 'nightly-builds-page', 'project-docs')
 GROUP BY channel, platform, source
 ORDER BY selections DESC
 FORMAT JSON`;
@@ -39,7 +42,7 @@ function isJsonObject(value: unknown): value is JsonObject {
 
 function addCount(current: number, increment: number): number {
   const next = current + increment;
-  if (!Number.isFinite(next)) {
+  if (!Number.isSafeInteger(next)) {
     throw invalidProviderData();
   }
   return next;
@@ -75,7 +78,7 @@ function aggregateSelectionStats(value: unknown): SelectionStats {
       typeof row.source !== "string" ||
       !SOURCE_LABELS.has(row.source as SourceLabel) ||
       typeof row.selections !== "number" ||
-      !Number.isFinite(row.selections) ||
+      !Number.isSafeInteger(row.selections) ||
       row.selections < 0
     ) {
       throw invalidProviderData();

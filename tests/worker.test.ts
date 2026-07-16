@@ -423,6 +423,28 @@ describe("public stats API", () => {
     expectSecurityHeaders(response);
   });
 
+  it("returns structured provider data when the Worker cache is unavailable", async () => {
+    vi.spyOn(caches, "open").mockRejectedValue(new Error("cache unavailable"));
+    const { env } = environment(assetBinding(), vi.fn(), {
+      CLOUDFLARE_ACCOUNT_ID: "account-id",
+      ANALYTICS_READ_TOKEN: "analytics-token",
+    });
+
+    const response = await handleRequest(
+      new Request("https://cmtraceopen.com/api/stats"),
+      env,
+      statsProviderFetcher(),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("application/json");
+    await expect(response.json()).resolves.toMatchObject({
+      github: { status: "fresh", stars: 42 },
+      selections: { status: "fresh", total: 7 },
+    });
+    expectSecurityHeaders(response);
+  });
+
   it("returns the branded 404 for POST on the product stats route", async () => {
     const { env, assets } = environment();
     const response = await handleRequest(

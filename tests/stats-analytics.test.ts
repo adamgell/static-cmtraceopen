@@ -70,7 +70,15 @@ describe("readSelectionStats", () => {
     expect(query).toContain("SUM(_sample_interval * double1)");
     expect(query).toContain("FROM cmtraceopen_download_events");
     expect(query).toContain("timestamp >= NOW() - INTERVAL '30' DAY");
-    expect(query).toContain("blob9 != 'unknown'");
+    expect(query).toContain("blob3 IN ('stable', 'nightly')");
+    expect(query).toContain("blob5 IN ('windows', 'macos', 'linux')");
+    expect(query).toContain(
+      "blob8 IN ('manual-only', 'mixed-manual-update')",
+    );
+    expect(query).toContain(
+      "blob9 IN ('download-home', 'github-readme', 'github-release', 'cmtraceopen-product', 'nightly-builds-page', 'project-docs')",
+    );
+    expect(query).not.toContain("blob9 != 'unknown'");
     expect(query).toMatch(/FORMAT JSON\s*$/);
   });
 
@@ -143,7 +151,13 @@ describe("readSelectionStats", () => {
     ).rejects.toThrow("Invalid Analytics Engine provider data");
   });
 
-  it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])(
+  it.each([
+    -1,
+    1.5,
+    Number.MAX_SAFE_INTEGER + 1,
+    Number.NaN,
+    Number.POSITIVE_INFINITY,
+  ])(
     "rejects invalid selection count %s",
     async (selections) => {
       const fetcher = vi.fn(async () => ({
@@ -160,4 +174,45 @@ describe("readSelectionStats", () => {
       ).rejects.toThrow("Invalid Analytics Engine provider data");
     },
   );
+
+  it("accepts the largest safe integer selection count", async () => {
+    const fetcher = asFetcher(responseJson({
+      meta: [],
+      data: [{
+        ...SUCCESS_BODY.data[0],
+        selections: Number.MAX_SAFE_INTEGER,
+      }],
+      rows: 1,
+    }));
+
+    await expect(
+      readSelectionStats(ACCOUNT_ID, TOKEN, fetcher),
+    ).resolves.toMatchObject({
+      total: Number.MAX_SAFE_INTEGER,
+      byChannel: { stable: Number.MAX_SAFE_INTEGER },
+      byPlatform: { windows: Number.MAX_SAFE_INTEGER },
+      bySource: { "download-home": Number.MAX_SAFE_INTEGER },
+    });
+  });
+
+  it("rejects an aggregate that exceeds the safe integer range", async () => {
+    const fetcher = asFetcher(responseJson({
+      meta: [],
+      data: [
+        {
+          ...SUCCESS_BODY.data[0],
+          selections: Number.MAX_SAFE_INTEGER,
+        },
+        {
+          ...SUCCESS_BODY.data[1],
+          selections: 1,
+        },
+      ],
+      rows: 2,
+    }));
+
+    await expect(
+      readSelectionStats(ACCOUNT_ID, TOKEN, fetcher),
+    ).rejects.toThrow("Invalid Analytics Engine provider data");
+  });
 });
