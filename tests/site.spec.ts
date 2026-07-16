@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { readFileSync } from "node:fs";
+import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
+import type { PublicStats } from "../src/lib/stats/types";
 
 const releaseFixture = JSON.parse(
   readFileSync(new URL("./fixtures/release-assets.json", import.meta.url), "utf8"),
@@ -34,6 +36,36 @@ const nightlyRelease = {
       ...asset.expected,
     })),
 };
+
+const publicStats: PublicStats = {
+  generatedAt: "2026-07-15T12:00:00.000Z",
+  github: {
+    status: "fresh",
+    updatedAt: "2026-07-15T12:00:00.000Z",
+    stars: 229,
+    packageDownloads: {
+      total: 24_305,
+      stable: 24_301,
+      currentNightly: 4,
+      byPlatform: { windows: 20_000, macos: 3_000, linux: 1_305 },
+    },
+  },
+  selections: {
+    status: "fresh",
+    updatedAt: "2026-07-15T12:00:00.000Z",
+    windowDays: 30,
+    total: 84,
+    byChannel: { stable: 80, nightly: 4 },
+    byPlatform: { windows: 65, macos: 12, linux: 7 },
+    bySource: { "download-home": 60, "github-release": 24 },
+  },
+};
+
+async function routePublicStats(page: Page, fixture: PublicStats = publicStats) {
+  await page.route("**/api/stats", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fixture) }),
+  );
+}
 
 test("skip link stays out of layout until keyboard focus", async ({ page }) => {
   await page.goto("/");
@@ -141,6 +173,7 @@ test("hero spacing remains continuous across the tablet breakpoint", async ({ pa
 });
 
 test("homepage is keyboard navigable and axe clean", async ({ page }) => {
+  await routePublicStats(page);
   await page.goto("/");
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus-visible")).toBeVisible();
@@ -150,6 +183,145 @@ test("homepage is keyboard navigable and axe clean", async ({ page }) => {
     .analyze();
 
   expect(results.violations).toEqual([]);
+});
+
+test("homepage publishes compact project signals from one public request", async ({ page }) => {
+  let requestCount = 0;
+  await page.route("**/api/stats", (route) => {
+    requestCount += 1;
+    expect(route.request().headers()["accept"]).toBe("application/json");
+    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(publicStats) });
+  });
+
+  await page.goto("/");
+
+  await expect(page.locator('[data-stat="package-total"]')).toHaveText("24.3K");
+  await expect(page.locator('[data-stat="stars"]')).toHaveText("229");
+  await expect(page.locator('[data-stat="selection-total"]')).toHaveText("84");
+  await expect(page.getByRole("link", { name: "Explore project stats" })).toHaveAttribute("href", "/stats/");
+  expect(requestCount).toBe(1);
+});
+
+test("stats ledger exposes exact values, breakdowns, and definitions", async ({ page }) => {
+  await routePublicStats(page);
+  await page.goto("/stats/");
+
+  await expect(page.getByRole("heading", { level: 1, name: "Project signals, with the receipts." })).toBeVisible();
+  await expect(page.locator('[data-stat="package-total"]')).toHaveText("24,305");
+  await expect(page.locator('[data-stat="stars"]')).toHaveText("229");
+  await expect(page.locator('[data-stat="selection-total"]')).toHaveText("84");
+
+  const exactRows = {
+    "github-channel-stable": ["Stable releases", "24,301"],
+    "github-channel-current-nightly": ["Current nightly", "4"],
+    "github-platform-windows": ["Windows", "20,000"],
+    "github-platform-macos": ["macOS", "3,000"],
+    "github-platform-linux": ["Linux", "1,305"],
+    "selection-channel-stable": ["Stable", "80"],
+    "selection-channel-nightly": ["Nightly", "4"],
+    "selection-platform-windows": ["Windows", "65"],
+    "selection-platform-macos": ["macOS", "12"],
+    "selection-platform-linux": ["Linux", "7"],
+    "selection-source-download-home": ["Download home", "60"],
+    "selection-source-github-release": ["GitHub release", "24"],
+  } as const;
+
+  for (const [hook, cells] of Object.entries(exactRows)) {
+    const row = page.locator(`[data-stat="${hook}"]`);
+    await expect(row).toContainText(cells[0]);
+    await expect(row).toContainText(cells[1]);
+  }
+
+  await expect(page.locator('[data-stat="github-status"]')).toHaveText("Fresh");
+  await expect(page.locator('[data-stat="selections-status"]')).toHaveText("Fresh");
+  await expect(page.locator('[data-stat="github-updated-at"]')).toContainText("July 15, 2026");
+  await expect(page.locator('[data-stat="selections-updated-at"]')).toContainText("July 15, 2026");
+
+  for (const definition of [
+    "Package downloads reported by GitHub are cumulative release-asset request counts",
+    "The nightly portion covers only assets attached to the current mutable nightly release",
+    "GitHub stars are the repository's current public stargazer count",
+    "30-day verified selections count aggregate uses of verified package links",
+    "Selections are link choices, not completed downloads, installations, or unique people",
+    "No application-runtime event enters these project stats",
+  ]) {
+    await expect(page.getByText(definition, { exact: false })).toBeVisible();
+  }
+});
+
+test("stats ledger keeps available selections when GitHub is unavailable", async ({ page }) => {
+  await routePublicStats(page, {
+    ...publicStats,
+    github: {
+      status: "unavailable",
+      updatedAt: null,
+      stars: null,
+      packageDownloads: null,
+    },
+  });
+  await page.goto("/stats/");
+
+  await expect(page.locator('[data-stat="package-total"]')).toHaveText("Temporarily unavailable");
+  await expect(page.locator('[data-stat="stars"]')).toHaveText("Temporarily unavailable");
+  await expect(page.locator('[data-stat="github-status"]')).toHaveText("Temporarily unavailable");
+  await expect(page.locator('[data-stat="selection-total"]')).toHaveText("84");
+  const unavailableFontSize = await page.locator('[data-stat="package-total"]').evaluate((element) =>
+    Number.parseFloat(getComputedStyle(element).fontSize),
+  );
+  expect(unavailableFontSize).toBeLessThanOrEqual(32);
+});
+
+test("invalid public stats preserve the static methodology and fail quietly", async ({ page }) => {
+  await page.route("**/api/stats", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ...publicStats, generatedAt: null }),
+    }),
+  );
+  await page.goto("/stats/");
+
+  await expect(page.locator('[data-stat="package-total"]')).toHaveText("Temporarily unavailable");
+  await expect(page.getByText("Aggregate project signals, not users or installations.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Stats temporarily unavailable.", { exact: true })).toBeVisible();
+  await expect(page.locator('[aria-live="polite"]')).toHaveCount(1);
+});
+
+test("project stats pages are axe clean", async ({ page }) => {
+  await routePublicStats(page);
+
+  for (const path of ["/", "/stats/"]) {
+    await page.goto(path);
+    await expect(page.locator('[data-stat="package-total"]')).not.toHaveText("Loading…");
+    const results = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(results.violations, `${path} accessibility violations`).toEqual([]);
+  }
+});
+
+test("project stats remain within the mobile document width", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await routePublicStats(page);
+
+  for (const path of ["/", "/stats/"]) {
+    await page.goto(path);
+    await expect(page.locator('[data-stat="package-total"]')).not.toHaveText("Loading…");
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, `${path} must not overflow horizontally`).toBe(0);
+  }
+});
+
+test("reduced motion renders project totals without count animation", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await routePublicStats(page);
+  await page.goto("/");
+
+  const total = page.locator('[data-stat="package-total"]');
+  await expect(total).toHaveText("24.3K");
+  expect(await total.evaluate((element) => element.getAnimations().length)).toBe(0);
 });
 
 test("homepage guide cards align their actions and column rules", async ({ page }) => {

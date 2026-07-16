@@ -1,0 +1,84 @@
+---
+import ProjectStats from "../components/ProjectStats.astro";
+import { SITE } from "../data/site";
+import ProductLayout from "../layouts/ProductLayout.astro";
+import "../styles/stats.css";
+---
+
+<ProductLayout
+  title="Project stats — CMTrace Open"
+  description="The public evidence ledger for CMTrace Open package requests, GitHub stars, and verified download-link selections."
+  canonicalPath="/stats/"
+>
+  <section class="stats-hero evidence-grid" aria-labelledby="stats-heading">
+    <div>
+      <span class="technical-label">PUBLIC PROJECT LEDGER · AGGREGATE SIGNALS</span>
+      <h1 id="stats-heading">Project signals, with the receipts.</h1>
+      <p>Aggregate release and link evidence, published with its definitions and limits intact.</p>
+    </div>
+  </section>
+
+  <ProjectStats mode="full" />
+
+  <section class="stats-methodology section-rule" aria-labelledby="methodology-heading">
+    <div class="stats-methodology-copy">
+      <span class="technical-label">READING THE LEDGER</span>
+      <h2 id="methodology-heading">What each signal can—and cannot—say.</h2>
+      <p>Aggregate project signals, not users or installations.</p>
+      <ul class="stats-links" aria-label="Project stats resources">
+        <li><a href="/privacy/">Read the privacy statement</a></li>
+        <li><a href={SITE.repository}>Inspect the repository</a></li>
+        <li><a href={`${SITE.download}?source=cmtraceopen-product`}>Open the download center</a></li>
+      </ul>
+    </div>
+
+    <dl class="stats-definitions">
+      <div>
+        <dt>Package downloads reported by GitHub</dt>
+        <dd>Package downloads reported by GitHub are cumulative release-asset request counts for human-installable packages. They exclude updater manifests, updater-only archives, signatures, SBOMs, and other supporting files.</dd>
+      </div>
+      <div>
+        <dt>Stable and current nightly</dt>
+        <dd>Stable combines published stable releases. The nightly portion covers only assets attached to the current mutable nightly release—not historical nightly assets that have already been replaced.</dd>
+      </div>
+      <div>
+        <dt>GitHub stars</dt>
+        <dd>GitHub stars are the repository's current public stargazer count from the GitHub repository API.</dd>
+      </div>
+      <div>
+        <dt>30-day verified selections</dt>
+        <dd>30-day verified selections count aggregate uses of verified package links routed through the CMTrace Open download site during a rolling 30-day window. Unknown or unrecognized source events are excluded.</dd>
+      </div>
+      <div>
+        <dt>Selection limits</dt>
+        <dd>Selections are link choices, not completed downloads, installations, or unique people. They remain distinct from GitHub's release-asset request counts.</dd>
+      </div>
+      <div>
+        <dt>Privacy boundary</dt>
+        <dd>No application-runtime event enters these project stats. Selection counts store no IP addresses, user-agent strings, cookies, fingerprints, full referrers, or persistent identifiers.</dd>
+      </div>
+    </dl>
+  </section>
+</ProductLayout>
+
+<style>
+  .stats-hero {
+    display: grid;
+    min-height: 30rem;
+    align-items: end;
+  }
+
+  .stats-hero > div {
+    max-width: 64rem;
+  }
+
+  .stats-hero h1 {
+    max-width: 12ch;
+    margin: var(--space-3) 0 var(--space-4);
+  }
+
+  .stats-hero p {
+    max-width: 48rem;
+    font-size: clamp(1.0625rem, 2vw, 1.35rem);
+  }
+</style>

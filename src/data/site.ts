@@ -14,6 +14,7 @@ export const NAV_ITEMS = [
   { label: "Product", href: "/" },
   { label: "Field Guide", href: "/field-guide/" },
   { label: "Nightly", href: "/nightly/" },
+  { label: "Stats", href: "/stats/" },
   { label: "GitHub", href: SITE.repository, external: true },
   {
     label: "Download",
