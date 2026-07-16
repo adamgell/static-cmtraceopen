@@ -104,7 +104,9 @@ function githubFetcher(env: RuntimeEnv, fetcher: typeof fetch): typeof fetch {
 }
 
 async function brandedNotFound(request: Request, env: Env): Promise<Response> {
-  const response = await env.ASSETS.fetch(requestAt(request, "/404/"));
+  const url = new URL(request.url);
+  url.pathname = "/404/";
+  const response = await env.ASSETS.fetch(new Request(url, { method: "GET" }));
   return secure(response, 404);
 }
 

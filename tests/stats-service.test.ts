@@ -135,6 +135,36 @@ describe("getPublicStats", () => {
     expect(cache.put).not.toHaveBeenCalled();
   });
 
+  it("drops cached stale provider data older than 24 hours on the fresh-cache path", async () => {
+    const fresh = snapshot({
+      generatedAt: "2026-07-16T11:30:00.000Z",
+      github: {
+        status: "stale",
+        updatedAt: "2026-07-15T11:59:59.999Z",
+        ...GITHUB,
+      },
+    });
+    const { cache } = cacheWith(fresh);
+
+    const result = await getPublicStats(REQUEST, CONFIG, DEPENDENCIES);
+
+    expect(result).toEqual({
+      status: 200,
+      stats: {
+        ...fresh,
+        github: {
+          status: "unavailable",
+          updatedAt: null,
+          stars: null,
+          packageDownloads: null,
+        },
+      },
+    });
+    expect(readGithubStats).not.toHaveBeenCalled();
+    expect(readSelectionStats).not.toHaveBeenCalled();
+    expect(cache.put).not.toHaveBeenCalled();
+  });
+
   it("returns fresh selections and unavailable GitHub data when GitHub fails without old data", async () => {
     cacheWith();
     vi.mocked(readGithubStats).mockRejectedValue(

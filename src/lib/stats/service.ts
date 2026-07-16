@@ -84,6 +84,25 @@ function staleSelections(
   return unavailableSelections();
 }
 
+function sanitizeCachedStats(cached: PublicStats, now: number): PublicStats {
+  const github =
+    ageInRange(cached.github.updatedAt, now, STALE_MS) &&
+      cached.github.stars !== null &&
+      cached.github.packageDownloads !== null
+      ? cached.github
+      : unavailableGithub();
+  const selections =
+    ageInRange(cached.selections.updatedAt, now, STALE_MS) &&
+      cached.selections.total !== null &&
+      cached.selections.byChannel !== null &&
+      cached.selections.byPlatform !== null &&
+      cached.selections.bySource !== null
+      ? cached.selections
+      : unavailableSelections();
+
+  return { ...cached, github, selections };
+}
+
 async function readCachedStats(
   cache: Cache,
   cacheKey: Request,
@@ -112,11 +131,12 @@ export async function getPublicStats(
   const cached = await readCachedStats(cache, cacheKey);
 
   if (cached && ageInRange(cached.generatedAt, currentTime, FRESH_MS)) {
-    const status = cached.github.status === "unavailable" &&
-      cached.selections.status === "unavailable"
+    const sanitized = sanitizeCachedStats(cached, currentTime);
+    const status = sanitized.github.status === "unavailable" &&
+      sanitized.selections.status === "unavailable"
       ? 503
       : 200;
-    return { status, stats: cached };
+    return { status, stats: sanitized };
   }
 
   const githubRequest = Promise.resolve().then(() =>

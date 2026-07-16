@@ -58,6 +58,13 @@ function assetBinding(): AssetFetcher {
     const request = input instanceof Request ? input : new Request(input);
     const url = new URL(request.url);
 
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return new Response("Method Not Allowed", {
+        status: 405,
+        headers: { Allow: "GET, HEAD" },
+      });
+    }
+
     if (url.pathname === "/_download/") {
       return new Response("<h1>Download CMTrace Open</h1>", {
         headers: { "Content-Type": "text/html" },
@@ -425,7 +432,9 @@ describe("public stats API", () => {
 
     expect(response.status).toBe(404);
     expect(await response.text()).toContain("This route dropped out of the timeline.");
-    expect(new URL((assets.mock.calls[0][0] as Request).url).pathname).toBe("/404/");
+    const assetRequest = assets.mock.calls[0][0] as Request;
+    expect(new URL(assetRequest.url).pathname).toBe("/404/");
+    expect(assetRequest.method).toBe("GET");
     expectSecurityHeaders(response);
   });
 
