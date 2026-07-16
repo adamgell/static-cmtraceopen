@@ -43,3 +43,19 @@ The Worker entry point, static assets, Analytics Engine binding, and compatibili
 - `download.cmtraceopen.com`
 
 Running `npm run deploy` performs the same build and deployment locally when you are ready. Do not commit Cloudflare credentials or local `.env` files.
+
+### Public stats
+
+The public stats endpoint requires these Worker secrets:
+
+- `GITHUB_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+- `ANALYTICS_READ_TOKEN`
+
+`CLOUDFLARE_ACCOUNT_ID` and `ANALYTICS_READ_TOKEN` are server-side only and must never be exposed to browser code. See [the analytics schema](analytics/schema.md) for the aggregate download-event fields used by the endpoint.
+
+With the local Worker preview running, smoke-test the endpoint with:
+
+```sh
+curl --resolve product.localhost:8787:127.0.0.1 http://product.localhost:8787/api/stats
+```
