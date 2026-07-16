@@ -35,7 +35,7 @@ const UNKNOWN: AssetClassification = {
   deliveryRole: "unknown",
 };
 
-const SOURCE_LABELS = new Set<SourceLabel>([
+export const SOURCE_LABELS = new Set<SourceLabel>([
   "download-home",
   "github-readme",
   "github-release",
