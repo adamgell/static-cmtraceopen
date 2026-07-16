@@ -85,11 +85,17 @@ function assetBinding(): AssetFetcher {
 function environment(
   assets = assetBinding(),
   writeDataPoint: ReturnType<typeof vi.fn> = vi.fn(),
+  values: {
+    GITHUB_TOKEN?: string;
+    CLOUDFLARE_ACCOUNT_ID?: string;
+    ANALYTICS_READ_TOKEN?: string;
+  } = {},
 ): { env: Env; assets: AssetFetcher; writeDataPoint: ReturnType<typeof vi.fn> } {
   return {
     env: {
       ASSETS: { fetch: assets },
       DOWNLOAD_EVENTS: { writeDataPoint },
+      ...values,
     } as unknown as Env,
     assets,
     writeDataPoint,
@@ -121,6 +127,46 @@ function expectSecurityHeaders(response: Response): void {
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     expect(response.headers.get(name), name).toBe(value);
   }
+}
+
+function emptyStatsCache(): void {
+  vi.spyOn(caches, "open").mockResolvedValue({
+    match: vi.fn(async () => undefined),
+    put: vi.fn(async () => undefined),
+  } as unknown as Cache);
+}
+
+function statsProviderFetcher(): typeof fetch {
+  return vi.fn(async (input: RequestInfo | URL) => {
+    const request = input instanceof Request ? input : new Request(input);
+    const url = new URL(request.url);
+
+    if (url.href === "https://api.github.com/repos/adamgell/cmtraceopen") {
+      return Response.json({ stargazers_count: 42 });
+    }
+    if (
+      url.origin === "https://api.github.com" &&
+      url.pathname === "/repos/adamgell/cmtraceopen/releases"
+    ) {
+      return Response.json([]);
+    }
+    if (
+      url.origin === "https://api.cloudflare.com" &&
+      url.pathname === "/client/v4/accounts/account-id/analytics_engine/sql"
+    ) {
+      return Response.json({
+        meta: [],
+        data: [{
+          channel: "stable",
+          platform: "windows",
+          source: "download-home",
+          selections: 7,
+        }],
+        rows: 1,
+      });
+    }
+    throw new Error(`Unexpected stats provider URL: ${url.href}`);
+  }) as unknown as typeof fetch;
 }
 
 afterEach(() => {
@@ -301,6 +347,99 @@ describe("nightly release API", () => {
     );
     expect(new Headers(init?.headers).get("Authorization")).toBe(`Bearer ${token}`);
     expect(await response.text()).not.toContain(token);
+  });
+});
+
+describe("public stats API", () => {
+  it("serves product stats with short public caching and host-scoped credentials", async () => {
+    emptyStatsCache();
+    const githubToken = "github-secret-that-must-stay-private";
+    const analyticsToken = "analytics-secret-that-must-stay-private";
+    const { env, assets } = environment(assetBinding(), vi.fn(), {
+      GITHUB_TOKEN: githubToken,
+      CLOUDFLARE_ACCOUNT_ID: "account-id",
+      ANALYTICS_READ_TOKEN: analyticsToken,
+    });
+    const providerFetcher = statsProviderFetcher();
+
+    const response = await handleRequest(
+      new Request("https://cmtraceopen.com/api/stats"),
+      env,
+      providerFetcher,
+    );
+    const body = await response.text();
+
+    expect(response).toMatchObject({ status: 200 });
+    expect(response.headers.get("Content-Type")).toContain("application/json");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=300");
+    expect(body).not.toContain(githubToken);
+    expect(body).not.toContain(analyticsToken);
+    expect(JSON.parse(body)).toMatchObject({
+      github: { status: "fresh", stars: 42 },
+      selections: { status: "fresh", total: 7 },
+    });
+    expect(assets).not.toHaveBeenCalled();
+    expectSecurityHeaders(response);
+
+    const calls = vi.mocked(providerFetcher).mock.calls.map(([input, init]) => ({
+      url: String(input),
+      authorization: new Headers(init?.headers).get("Authorization"),
+    }));
+    expect(calls.filter(({ url }) => url.startsWith("https://api.github.com/")))
+      .toEqual([
+        expect.objectContaining({ authorization: `Bearer ${githubToken}` }),
+        expect.objectContaining({ authorization: `Bearer ${githubToken}` }),
+      ]);
+    expect(calls.filter(({ url }) => url.startsWith("https://api.cloudflare.com/")))
+      .toEqual([
+        expect.objectContaining({ authorization: `Bearer ${analyticsToken}` }),
+      ]);
+  });
+
+  it("returns a bodyless HEAD response with the GET status and headers", async () => {
+    emptyStatsCache();
+    const { env } = environment(assetBinding(), vi.fn(), {
+      CLOUDFLARE_ACCOUNT_ID: "account-id",
+      ANALYTICS_READ_TOKEN: "analytics-token",
+    });
+
+    const response = await handleRequest(
+      new Request("https://cmtraceopen.com/api/stats", { method: "HEAD" }),
+      env,
+      statsProviderFetcher(),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("application/json");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=300");
+    expect(await response.text()).toBe("");
+    expectSecurityHeaders(response);
+  });
+
+  it("returns the branded 404 for POST on the product stats route", async () => {
+    const { env, assets } = environment();
+    const response = await handleRequest(
+      new Request("https://cmtraceopen.com/api/stats", { method: "POST" }),
+      env,
+    );
+
+    expect(response.status).toBe(404);
+    expect(await response.text()).toContain("This route dropped out of the timeline.");
+    expect(new URL((assets.mock.calls[0][0] as Request).url).pathname).toBe("/404/");
+    expectSecurityHeaders(response);
+  });
+
+  it("does not expose the product stats API on the download hostname", async () => {
+    const { env, assets } = environment();
+    const response = await handleRequest(
+      new Request("https://download.cmtraceopen.com/api/stats"),
+      env,
+    );
+
+    expect(response.status).toBe(404);
+    expect(await response.text()).toContain("This route dropped out of the timeline.");
+    expect(new URL((assets.mock.calls[0][0] as Request).url).pathname).toBe("/404/");
+    expectSecurityHeaders(response);
   });
 });
 

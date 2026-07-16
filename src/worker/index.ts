@@ -6,11 +6,14 @@ import {
   getVerifiedAsset,
   getVerifiedNightlyAsset,
 } from "../lib/releases/github";
+import { getPublicStats } from "../lib/stats/service";
 
 export type Surface = "product" | "download" | "unknown";
 
 type RuntimeEnv = Env & {
   GITHUB_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  ANALYTICS_READ_TOKEN?: string;
 };
 
 const PRODUCT_HOSTS = new Set([
@@ -107,8 +110,9 @@ async function brandedNotFound(request: Request, env: Env): Promise<Response> {
 
 async function handleProduct(
   request: Request,
-  env: Env,
+  env: RuntimeEnv,
   url: URL,
+  githubApiFetcher: typeof fetch,
   fetcher: typeof fetch,
 ): Promise<Response> {
   if (url.pathname === "/download" || url.pathname === "/download/") {
@@ -116,10 +120,38 @@ async function handleProduct(
   }
   if (request.method === "GET" && url.pathname === "/api/releases/nightly") {
     try {
-      return secure(Response.json(await getNightlyRelease(request, fetcher)));
+      return secure(Response.json(await getNightlyRelease(request, githubApiFetcher)));
     } catch {
       return secure(Response.json({ error: "Nightly release unavailable." }, { status: 503 }));
     }
+  }
+  if (url.pathname === "/api/stats") {
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return brandedNotFound(request, env);
+    }
+
+    const { status, stats } = await getPublicStats(
+      request,
+      {
+        cloudflareAccountId: env.CLOUDFLARE_ACCOUNT_ID,
+        analyticsReadToken: env.ANALYTICS_READ_TOKEN,
+      },
+      {
+        githubFetcher: githubApiFetcher,
+        analyticsFetcher: fetcher,
+      },
+    );
+    const response = Response.json(stats, {
+      status,
+      headers: { "Cache-Control": "public, max-age=300" },
+    });
+    if (request.method === "HEAD") {
+      return secure(new Response(null, {
+        status,
+        headers: response.headers,
+      }));
+    }
+    return secure(response);
   }
   return secure(await env.ASSETS.fetch(request));
 }
@@ -188,14 +220,16 @@ async function handleDownload(
 
 export async function handleRequest(
   request: Request,
-  env: Env,
+  env: RuntimeEnv,
   fetcher: typeof fetch = fetch,
 ): Promise<Response> {
   const url = new URL(request.url);
   const surface = surfaceFor(url.hostname);
   const releaseFetcher = githubFetcher(env, fetcher);
 
-  if (surface === "product") return handleProduct(request, env, url, releaseFetcher);
+  if (surface === "product") {
+    return handleProduct(request, env, url, releaseFetcher, fetcher);
+  }
   if (surface === "download") return handleDownload(request, env, url, releaseFetcher);
   return secure(new Response("Misdirected request", { status: 421 }));
 }
