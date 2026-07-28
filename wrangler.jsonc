@@ -8,7 +8,19 @@
   "routes": [
     { "pattern": "cmtraceopen.com/*", "zone_name": "cmtraceopen.com" },
     { "pattern": "www.cmtraceopen.com/*", "zone_name": "cmtraceopen.com" },
-    { "pattern": "download.cmtraceopen.com", "custom_domain": true }
+    { "pattern": "download.cmtraceopen.com", "custom_domain": true },
+    // cmtrace.net shortlinks. custom_domain rather than a zone_name route:
+    // a route only fires for a hostname that already has a proxied DNS record,
+    // and this zone has none, so a route would be inert. custom_domain creates
+    // the record and attaches the hostname in one step.
+    { "pattern": "cmtrace.net", "custom_domain": true },
+    { "pattern": "www.cmtrace.net", "custom_domain": true },
+    { "pattern": "win.cmtrace.net", "custom_domain": true },
+    { "pattern": "winarm.cmtrace.net", "custom_domain": true },
+    { "pattern": "lite.cmtrace.net", "custom_domain": true },
+    { "pattern": "mac.cmtrace.net", "custom_domain": true },
+    { "pattern": "msi.cmtrace.net", "custom_domain": true },
+    { "pattern": "nightly.cmtrace.net", "custom_domain": true }
   ],
   "assets": {
     "directory": "./dist",
