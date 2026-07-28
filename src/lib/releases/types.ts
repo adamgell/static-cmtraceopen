@@ -30,6 +30,7 @@ export type SourceLabel =
   | "cmtraceopen-product"
   | "nightly-builds-page"
   | "project-docs"
+  | "cmtrace-net"
   | "unknown";
 
 export type AssetClassification = {

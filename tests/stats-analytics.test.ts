@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { SOURCE_LABELS } from "../src/lib/releases/classify";
 import {
   ANALYTICS_DATASET,
   readSelectionStats,
@@ -75,9 +76,13 @@ describe("readSelectionStats", () => {
     expect(query).toContain(
       "blob8 IN ('manual-only', 'mixed-manual-update')",
     );
-    expect(query).toContain(
-      "blob9 IN ('download-home', 'github-readme', 'github-release', 'cmtraceopen-product', 'nightly-builds-page', 'project-docs')",
-    );
+    // Derived from SOURCE_LABELS, so adding a source cannot silently drop it
+    // from the published stats. Asserting the derivation rather than a
+    // hand-copied literal is what keeps the two from drifting apart.
+    const expectedSources = [...SOURCE_LABELS].map((source) => `'${source}'`).join(", ");
+    expect(expectedSources).toContain("'cmtrace-net'");
+    expect(expectedSources).not.toContain("'unknown'");
+    expect(query).toContain(`blob9 IN (${expectedSources})`);
     expect(query).not.toContain("blob9 != 'unknown'");
     expect(query).toMatch(/FORMAT JSON\s*$/);
   });

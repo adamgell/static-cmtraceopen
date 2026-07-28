@@ -42,6 +42,7 @@ export const SOURCE_LABELS = new Set<SourceLabel>([
   "cmtraceopen-product",
   "nightly-builds-page",
   "project-docs",
+  "cmtrace-net",
 ]);
 
 function windowsClassification(

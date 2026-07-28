@@ -8,6 +8,19 @@ import type {
 
 export const ANALYTICS_DATASET = "cmtraceopen_download_events";
 
+// Derived from SOURCE_LABELS rather than hand-written, so a new source label can
+// never be silently filtered out of the published stats. SourceLabel is a
+// compile-time union of kebab-case literals; the guard makes that an enforced
+// invariant instead of an assumed one, and fires deterministically at module load.
+const SOURCE_ALLOWLIST = [...SOURCE_LABELS]
+  .map((source) => {
+    if (!/^[a-z0-9-]+$/.test(source)) {
+      throw new Error(`Unsafe source label in analytics allowlist: ${source}`);
+    }
+    return `'${source}'`;
+  })
+  .join(", ");
+
 const ANALYTICS_QUERY = `SELECT
   blob3 AS channel,
   blob5 AS platform,
@@ -18,7 +31,7 @@ WHERE timestamp >= NOW() - INTERVAL '30' DAY
   AND blob3 IN ('stable', 'nightly')
   AND blob5 IN ('windows', 'macos', 'linux')
   AND blob8 IN ('manual-only', 'mixed-manual-update')
-  AND blob9 IN ('download-home', 'github-readme', 'github-release', 'cmtraceopen-product', 'nightly-builds-page', 'project-docs')
+  AND blob9 IN (${SOURCE_ALLOWLIST})
 GROUP BY channel, platform, source
 ORDER BY selections DESC
 FORMAT JSON`;
