@@ -7,6 +7,7 @@ import {
   getVerifiedNightlyAsset,
 } from "../lib/releases/github";
 import { getPublicStats } from "../lib/stats/service";
+import { brandedNotFound, redirect, requestAt, secure } from "./response";
 
 export type Surface = "product" | "download" | "unknown";
 
@@ -38,44 +39,11 @@ const DOWNLOAD_SHARED_FILES = new Set([
   "/site.webmanifest",
 ]);
 
-const SECURITY_HEADERS = {
-  "Content-Security-Policy":
-    "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'",
-  "Referrer-Policy": "no-referrer",
-  "X-Content-Type-Options": "nosniff",
-  "Permissions-Policy":
-    "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
-} as const;
-
 export function surfaceFor(hostname: string): Surface {
   const host = hostname.toLowerCase().split(":", 1)[0];
   if (PRODUCT_HOSTS.has(host)) return "product";
   if (DOWNLOAD_HOSTS.has(host)) return "download";
   return "unknown";
-}
-
-function secure(response: Response, status = response.status): Response {
-  const headers = new Headers(response.headers);
-  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
-    headers.set(name, value);
-  }
-  return new Response(response.body, {
-    status,
-    statusText: status === response.status ? response.statusText : undefined,
-    headers,
-  });
-}
-
-function redirect(location: string, noStore = false): Response {
-  const headers = new Headers({ Location: location });
-  if (noStore) headers.set("Cache-Control", "no-store");
-  return secure(new Response(null, { status: 302, headers }));
-}
-
-function requestAt(request: Request, pathname: string): Request {
-  const url = new URL(request.url);
-  url.pathname = pathname;
-  return new Request(url, request);
 }
 
 function githubFetcher(env: RuntimeEnv, fetcher: typeof fetch): typeof fetch {
@@ -101,13 +69,6 @@ function githubFetcher(env: RuntimeEnv, fetcher: typeof fetch): typeof fetch {
     headers.set("Authorization", `Bearer ${token}`);
     return fetcher(input, { ...init, headers });
   }) as typeof fetch;
-}
-
-async function brandedNotFound(request: Request, env: Env): Promise<Response> {
-  const url = new URL(request.url);
-  url.pathname = "/404/";
-  const response = await env.ASSETS.fetch(new Request(url, { method: "GET" }));
-  return secure(response, 404);
 }
 
 async function handleProduct(
@@ -189,7 +150,7 @@ async function handleDownload(
       const asset = await getVerifiedAsset(id, request, fetcher);
       const source = normalizeSource(url.searchParams.get("source"));
       recordDownload(env.DOWNLOAD_EVENTS, asset, source);
-      return redirect(asset.browserDownloadUrl, true);
+      return redirect(asset.browserDownloadUrl, { cacheControl: "no-store" });
     } catch {
       return brandedNotFound(request, env);
     }
@@ -204,7 +165,7 @@ async function handleDownload(
       const asset = await getVerifiedNightlyAsset(id, request, fetcher);
       const source = normalizeSource(url.searchParams.get("source"));
       recordDownload(env.DOWNLOAD_EVENTS, asset, source);
-      return redirect(asset.browserDownloadUrl, true);
+      return redirect(asset.browserDownloadUrl, { cacheControl: "no-store" });
     } catch {
       return brandedNotFound(request, env);
     }
