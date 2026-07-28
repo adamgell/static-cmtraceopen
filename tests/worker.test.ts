@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { handleRequest } from "../src/worker/index";
+import { handleRequest, surfaceFor } from "../src/worker/index";
 
 const SECURITY_HEADERS = {
   "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'",
@@ -128,6 +128,68 @@ function nightlyGithubFetcher(): typeof fetch {
     if (url.endsWith("/releases/tags/nightly")) return Response.json(NIGHTLY_RELEASE);
     throw new Error(`Unexpected GitHub URL: ${url}`);
   }) as unknown as typeof fetch;
+}
+
+const SHORTLINK_TAG = "v1.5.0";
+const SHORTLINK_NAMES = [
+  "CMTrace-Open_1.5.0_x64.exe",
+  "CMTrace-Open_1.5.0_arm64.exe",
+  "CMTrace-Open-Lite_1.5.0_x64.exe",
+  "CMTrace-Open_1.5.0_x64-setup.exe",
+  "CMTrace-Open_1.5.0_x64.msi",
+  "CMTrace.Open_1.5.0_aarch64.dmg",
+];
+
+function githubAsset(name: string, id: number, tag = SHORTLINK_TAG) {
+  return {
+    id,
+    name,
+    size: 1024,
+    content_type: "application/octet-stream",
+    browser_download_url: `https://github.com/adamgell/cmtraceopen/releases/download/${tag}/${name}`,
+  };
+}
+
+function shortlinkRelease(names: string[] = SHORTLINK_NAMES) {
+  return {
+    tag_name: SHORTLINK_TAG,
+    name: "CMTrace Open v1.5.0",
+    published_at: "2026-07-27T12:00:00Z",
+    html_url: `https://github.com/adamgell/cmtraceopen/releases/tag/${SHORTLINK_TAG}`,
+    draft: false,
+    prerelease: false,
+    assets: names.map((name, index) => githubAsset(name, 5000 + index)),
+  };
+}
+
+const SHORTLINK_NIGHTLY_NAME = "CMTrace-Open_Nightly_20260728_412_efb9803c9f91_x64.exe";
+const SHORTLINK_NIGHTLY_RELEASE = {
+  tag_name: "nightly",
+  name: "CMTrace Open Nightly",
+  published_at: "2026-07-28T07:00:00Z",
+  html_url: "https://github.com/adamgell/cmtraceopen/releases/tag/nightly",
+  draft: false,
+  prerelease: true,
+  assets: [{
+    ...githubAsset(SHORTLINK_NIGHTLY_NAME, 5100, "nightly"),
+    created_at: "2026-07-28T07:20:00Z",
+    updated_at: "2026-07-28T07:30:00Z",
+  }],
+};
+
+function shortlinkGithubFetcher(
+  stableResponse: () => Response = () => Response.json(shortlinkRelease()),
+): typeof fetch {
+  return vi.fn(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.endsWith("/releases/latest")) return stableResponse();
+    if (url.endsWith("/releases/tags/nightly")) return Response.json(SHORTLINK_NIGHTLY_RELEASE);
+    throw new Error(`Unexpected GitHub URL: ${url}`);
+  }) as unknown as typeof fetch;
+}
+
+function downloadUrl(name: string, tag = SHORTLINK_TAG): string {
+  return `https://github.com/adamgell/cmtraceopen/releases/download/${tag}/${name}`;
 }
 
 function expectSecurityHeaders(response: Response): void {
@@ -586,5 +648,300 @@ describe("verified asset redirects", () => {
     expect(warn).not.toHaveBeenCalled();
     expect(log).not.toHaveBeenCalled();
     expectSecurityHeaders(response);
+  });
+});
+
+describe("cmtrace.net shortlink surface", () => {
+  it.each([
+    ["win", "CMTrace-Open_1.5.0_x64.exe"],
+    ["winarm", "CMTrace-Open_1.5.0_arm64.exe"],
+    ["lite", "CMTrace-Open-Lite_1.5.0_x64.exe"],
+    ["mac", "CMTrace.Open_1.5.0_aarch64.dmg"],
+    ["msi", "CMTrace-Open_1.5.0_x64.msi"],
+  ])("redirects %s straight to the latest %s", async (host, name) => {
+    const { env, writeDataPoint } = environment();
+
+    const response = await handleRequest(
+      new Request(`https://${host}.cmtrace.localhost:8650/`),
+      env,
+      shortlinkGithubFetcher(),
+    );
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("Location")).toBe(downloadUrl(name));
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(writeDataPoint).toHaveBeenCalledOnce();
+    expect(writeDataPoint.mock.calls[0][0].blobs).toContain(name);
+    expect(writeDataPoint.mock.calls[0][0].blobs.at(-1)).toBe("cmtrace-net");
+    expectSecurityHeaders(response);
+  });
+
+  it.each([
+    ["win", "CMTrace-Open_1.5.0_x64.exe", ["CMTrace-Open-Lite_1.5.0_x64.exe", "CMTrace-Open_1.5.0_x64-setup.exe"]],
+    ["lite", "CMTrace-Open-Lite_1.5.0_x64.exe", ["CMTrace-Open_1.5.0_x64.exe"]],
+  ])("never confuses the %s edition with a same-extension sibling", async (host, expected, forbidden) => {
+    const { env } = environment();
+
+    const response = await handleRequest(
+      new Request(`https://${host}.cmtrace.localhost:8651/`),
+      env,
+      shortlinkGithubFetcher(),
+    );
+
+    expect(response.headers.get("Location")).toBe(downloadUrl(expected));
+    for (const name of forbidden) {
+      expect(response.headers.get("Location")).not.toBe(downloadUrl(name));
+    }
+  });
+
+  it("resolves the nightly host against the nightly channel", async () => {
+    const { env, writeDataPoint } = environment();
+
+    const response = await handleRequest(
+      new Request("https://nightly.cmtrace.localhost:8652/"),
+      env,
+      shortlinkGithubFetcher(),
+    );
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("Location")).toBe(downloadUrl(SHORTLINK_NIGHTLY_NAME, "nightly"));
+    expect(writeDataPoint).toHaveBeenCalledOnce();
+    expect(writeDataPoint.mock.calls[0][0].blobs).toContain("nightly");
+    expect(writeDataPoint.mock.calls[0][0].blobs.at(-1)).toBe("cmtrace-net");
+  });
+
+  it("falls back to the chooser without counting when the architecture did not build", async () => {
+    const { env, writeDataPoint } = environment();
+    const withoutArm64 = shortlinkRelease(
+      SHORTLINK_NAMES.filter((name) => name !== "CMTrace-Open_1.5.0_arm64.exe"),
+    );
+
+    const response = await handleRequest(
+      new Request("https://winarm.cmtrace.localhost:8653/"),
+      env,
+      shortlinkGithubFetcher(() => Response.json(withoutArm64)),
+    );
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("Location")).toBe(
+      "https://download.cmtraceopen.com/?source=cmtrace-net",
+    );
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(writeDataPoint).not.toHaveBeenCalled();
+    expectSecurityHeaders(response);
+  });
+
+  it("falls back to the chooser without counting when GitHub is unavailable", async () => {
+    const { env, writeDataPoint } = environment();
+
+    const response = await handleRequest(
+      new Request("https://win.cmtrace.localhost:8654/"),
+      env,
+      shortlinkGithubFetcher(() => Response.json({ message: "Unavailable" }, { status: 503 })),
+    );
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("Location")).toBe(
+      "https://download.cmtraceopen.com/?source=cmtrace-net",
+    );
+    expect(writeDataPoint).not.toHaveBeenCalled();
+  });
+
+  it("refuses to guess when two assets share a classification", async () => {
+    const { env, writeDataPoint } = environment();
+    const ambiguous = shortlinkRelease([...SHORTLINK_NAMES, "CMTrace-Open_1.5.1_x64.exe"]);
+
+    const response = await handleRequest(
+      new Request("https://win.cmtrace.localhost:8655/"),
+      env,
+      shortlinkGithubFetcher(() => Response.json(ambiguous)),
+    );
+
+    expect(response.headers.get("Location")).toBe(
+      "https://download.cmtraceopen.com/?source=cmtrace-net",
+    );
+    expect(writeDataPoint).not.toHaveBeenCalled();
+  });
+
+  it("shares one release cache entry across every shortlink host on the zone", async () => {
+    const { env } = environment();
+    const fetcher = shortlinkGithubFetcher();
+
+    const first = await handleRequest(
+      new Request("https://win.cmtrace.localhost:8656/"),
+      env,
+      fetcher,
+    );
+    const second = await handleRequest(
+      new Request("https://mac.cmtrace.localhost:8656/"),
+      env,
+      fetcher,
+    );
+
+    expect(first.headers.get("Location")).toBe(downloadUrl("CMTrace-Open_1.5.0_x64.exe"));
+    expect(second.headers.get("Location")).toBe(downloadUrl("CMTrace.Open_1.5.0_aarch64.dmg"));
+    expect(fetcher).toHaveBeenCalledOnce();
+  });
+
+  it.each(["cmtrace.localhost:8657", "www.cmtrace.localhost:8657"])(
+    "sends %s to the product site with a revocable permanent redirect",
+    async (host) => {
+      const { env, assets, writeDataPoint } = environment();
+      const fetcher = vi.fn();
+
+      const response = await handleRequest(
+        new Request(`https://${host}/`),
+        env,
+        fetcher as unknown as typeof fetch,
+      );
+
+      expect(response.status).toBe(301);
+      expect(response.headers.get("Location")).toBe("https://cmtraceopen.com/");
+      expect(response.headers.get("Cache-Control")).toBe("public, max-age=86400");
+      expect(fetcher).not.toHaveBeenCalled();
+      expect(assets).not.toHaveBeenCalled();
+      expect(writeDataPoint).not.toHaveBeenCalled();
+      expectSecurityHeaders(response);
+    },
+  );
+
+  it("ignores the path and query so a pasted link with tracking params still works", async () => {
+    const { env } = environment();
+
+    const response = await handleRequest(
+      new Request("https://win.cmtrace.localhost:8658/download/?utm_source=slack&source=github-readme"),
+      env,
+      shortlinkGithubFetcher(),
+    );
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("Location")).toBe(downloadUrl("CMTrace-Open_1.5.0_x64.exe"));
+  });
+
+  it("keeps crawlers out of the installers", async () => {
+    const { env, assets, writeDataPoint } = environment();
+    const fetcher = vi.fn();
+
+    const response = await handleRequest(
+      new Request("https://win.cmtrace.localhost:8658/robots.txt"),
+      env,
+      fetcher as unknown as typeof fetch,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("text/plain; charset=utf-8");
+    expect(await response.text()).toBe("User-agent: *\nDisallow: /\n");
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(assets).not.toHaveBeenCalled();
+    expect(writeDataPoint).not.toHaveBeenCalled();
+    expectSecurityHeaders(response);
+  });
+
+  it("answers the browser favicon probe without serving an installer", async () => {
+    const { env, writeDataPoint } = environment();
+    const fetcher = vi.fn();
+
+    const response = await handleRequest(
+      new Request("https://win.cmtrace.localhost:8658/favicon.ico"),
+      env,
+      fetcher as unknown as typeof fetch,
+    );
+
+    expect(response.status).toBe(204);
+    expect(await response.text()).toBe("");
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(writeDataPoint).not.toHaveBeenCalled();
+  });
+
+  it("rejects a write method before resolving a release or counting anything", async () => {
+    const { env, assets, writeDataPoint } = environment();
+    const fetcher = vi.fn();
+
+    const response = await handleRequest(
+      new Request("https://win.cmtrace.localhost:8659/", { method: "POST" }),
+      env,
+      fetcher as unknown as typeof fetch,
+    );
+
+    expect(response.status).toBe(405);
+    expect(response.headers.get("Allow")).toBe("GET, HEAD");
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(assets).not.toHaveBeenCalled();
+    expect(writeDataPoint).not.toHaveBeenCalled();
+    expectSecurityHeaders(response);
+  });
+
+  it("serves a link unfurl without inflating the download count", async () => {
+    const { env, writeDataPoint } = environment();
+
+    const response = await handleRequest(
+      new Request("https://win.cmtrace.localhost:8659/", { method: "HEAD" }),
+      env,
+      shortlinkGithubFetcher(),
+    );
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("Location")).toBe(downloadUrl("CMTrace-Open_1.5.0_x64.exe"));
+    expect(await response.text()).toBe("");
+    expect(writeDataPoint).not.toHaveBeenCalled();
+  });
+
+  it("pins the source label at the hostname and never reads request metadata", async () => {
+    const { env, writeDataPoint } = environment();
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+    const response = await handleRequest(
+      new Request("https://win.cmtrace.localhost:8659/?source=person-private&target=https://evil.example/", {
+        headers: {
+          "CF-Connecting-IP": "203.0.113.9",
+          Cookie: "visitor=private",
+          Referer: "https://private.example/person/42",
+          "User-Agent": "private-browser-agent",
+        },
+      }),
+      env,
+      shortlinkGithubFetcher(),
+    );
+
+    expect(response.status).toBe(302);
+    expect(writeDataPoint).toHaveBeenCalledOnce();
+    const event = writeDataPoint.mock.calls[0][0];
+    expect(event.blobs.at(-1)).toBe("cmtrace-net");
+    expect(JSON.stringify(event)).not.toMatch(/203\.0\.113\.9|private-browser-agent|private\.example|evil\.example|person-private/);
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+    expect(log).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "cmtrace.net",
+    "www.cmtrace.net",
+    "win.cmtrace.net",
+    "winarm.cmtrace.net",
+    "lite.cmtrace.net",
+    "mac.cmtrace.net",
+    "msi.cmtrace.net",
+    "nightly.cmtrace.net",
+  ])("routes %s to the shortlink surface", (host) => {
+    expect(surfaceFor(host)).toBe("shortlink");
+  });
+
+  it("refuses an unmapped subdomain of the shortlink zone", async () => {
+    const { env, writeDataPoint } = environment();
+    const fetcher = vi.fn();
+
+    expect(surfaceFor("foo.cmtrace.net")).toBe("unknown");
+
+    const response = await handleRequest(
+      new Request("https://foo.cmtrace.localhost:8659/"),
+      env,
+      fetcher as unknown as typeof fetch,
+    );
+
+    expect(response.status).toBe(421);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(writeDataPoint).not.toHaveBeenCalled();
   });
 });

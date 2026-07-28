@@ -8,8 +8,9 @@ import {
 } from "../lib/releases/github";
 import { getPublicStats } from "../lib/stats/service";
 import { brandedNotFound, redirect, requestAt, secure } from "./response";
+import { handleShortlink, shortlinkRoute } from "./shortlink";
 
-export type Surface = "product" | "download" | "unknown";
+export type Surface = "product" | "download" | "shortlink" | "unknown";
 
 type RuntimeEnv = Env & {
   GITHUB_TOKEN?: string;
@@ -43,6 +44,7 @@ export function surfaceFor(hostname: string): Surface {
   const host = hostname.toLowerCase().split(":", 1)[0];
   if (PRODUCT_HOSTS.has(host)) return "product";
   if (DOWNLOAD_HOSTS.has(host)) return "download";
+  if (shortlinkRoute(host)) return "shortlink";
   return "unknown";
 }
 
@@ -194,6 +196,10 @@ export async function handleRequest(
     return handleProduct(request, env, url, releaseFetcher, fetcher);
   }
   if (surface === "download") return handleDownload(request, env, url, releaseFetcher);
+  if (surface === "shortlink") {
+    const route = shortlinkRoute(url.hostname);
+    if (route) return handleShortlink(request, env, url, route, releaseFetcher);
+  }
   return secure(new Response("Misdirected request", { status: 421 }));
 }
 
