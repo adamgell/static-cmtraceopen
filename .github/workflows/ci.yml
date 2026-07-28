@@ -1,0 +1,81 @@
+name: CI
+
+# Cloudflare Workers Builds deploys on every push to main and does not wait for
+# this workflow. These checks are therefore only a real gate while main is
+# protected and changes land through a pull request.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Keep wrangler non-interactive and quiet in CI.
+  WRANGLER_SEND_METRICS: "false"
+
+jobs:
+  verify:
+    name: Types and worker tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      # The only check that exercises hostname routing, the redirect contract and
+      # the Cache API. wrangler dev cannot: it presents every request as localhost.
+      - name: Worker unit and integration tests
+        run: npm run test:worker
+
+      - name: Content contract tests
+        run: npm run test:content
+
+  e2e:
+    name: Browser end-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Site end-to-end
+        run: npm run test:e2e
+
+      - name: Worker end-to-end
+        run: npm run test:e2e:worker
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
