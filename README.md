@@ -30,23 +30,23 @@ npm run test:worker
 
 ## Cloudflare
 
-Connect this repository to Cloudflare Workers with these build settings:
+**Deployment is manual.** The Worker's Git integration is not connected, so pushing to `main` does not deploy anything — run `npm run deploy` (build plus `wrangler deploy`) from a checkout. If you ever do connect the repository to Cloudflare Workers Builds, use these settings:
 
 - Root directory: `/`
 - Build command: `npm run build`
 - Deploy command: `npx wrangler deploy`
 - Node.js version: `22.12.0`
 
-The Worker entry point, static assets, Analytics Engine binding, and compatibility date are defined in `wrangler.jsonc`. After the Worker is connected, attach these custom domains in Cloudflare:
+The Worker entry point, static assets, Analytics Engine binding, and compatibility date are defined in `wrangler.jsonc`. These custom domains are attached to the Worker:
 
 - `cmtraceopen.com`
 - `www.cmtraceopen.com`
 - `download.cmtraceopen.com`
 - `cmtrace.net`, `www.cmtrace.net`, `win.cmtrace.net`, `winarm.cmtrace.net`, `lite.cmtrace.net`, `mac.cmtrace.net`, `msi.cmtrace.net`, `nightly.cmtrace.net`
 
-The `cmtrace.net` zone must be on the same Cloudflare account as the Worker; check with `npx wrangler whoami` before the first deploy. Attaching a custom domain writes DNS, so the deploy token needs `Zone:DNS:Edit` on that zone — if the git-integration deploy fails, attach the eight domains once through the dashboard and subsequent deploys reconcile against `wrangler.jsonc` without needing the permission.
+All of these zones live on the same Cloudflare account as the Worker (verify with `npx wrangler whoami`). Attaching a custom domain writes a DNS record, which the local OAuth login is not scoped for — the eight `cmtrace.net` domains were attached through the dashboard (Workers & Pages → the Worker → Domains → Add Domain), and `wrangler deploy` now reconciles against `wrangler.jsonc` without needing the permission. Add any future domain the same way.
 
-Running `npm run deploy` performs the same build and deployment locally when you are ready. Do not commit Cloudflare credentials or local `.env` files.
+Do not commit Cloudflare credentials or local `.env` files.
 
 ### cmtrace.net shortlinks
 
