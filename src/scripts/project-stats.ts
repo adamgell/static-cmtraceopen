@@ -12,6 +12,9 @@ const timestamp = new Intl.DateTimeFormat("en", {
   timeZone: "UTC",
 });
 
+// Every source the API can return needs an entry here. A source that is missing
+// is filtered out of the ledger below while still counting toward the total,
+// which reads as an unexplained gap rather than as a bug.
 const SOURCE_LABELS = {
   "download-home": "Download home",
   "github-readme": "GitHub README",
@@ -19,6 +22,7 @@ const SOURCE_LABELS = {
   "cmtraceopen-product": "CMTrace Open product",
   "nightly-builds-page": "Nightly builds page",
   "project-docs": "Project documentation",
+  "cmtrace-net": "cmtrace.net shortlink",
 } as const;
 
 type JsonObject = Record<string, unknown>;

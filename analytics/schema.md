@@ -1,6 +1,6 @@
 # Download event schema
 
-`cmtraceopen_download_events` records one aggregate event when a person uses a verified download link. The event contains only the ordered, allowlisted release dimensions below.
+`cmtraceopen_download_events` records one aggregate event when a person uses a verified download link, whether that link was chosen on the download site or followed through a `cmtrace.net` shortlink hostname. The event contains only the ordered, allowlisted release dimensions below.
 
 | Analytics Engine column | Meaning |
 | --- | --- |

@@ -78,4 +78,4 @@ export const GUIDES = [
   },
 ] as const satisfies readonly Guide[];
 
-export const PRIVACY_STATEMENT = "CMTrace Open requires no account and sends no analytics, usage, device, crash, identity, or behavioral telemetry when it runs. GitHub provides aggregate release-asset download counts. The download website records aggregate uses of download links without storing IP addresses, cookies, user-agent strings, fingerprints, full referrers, or persistent identifiers. The application never sends data to the download analytics system.";
+export const PRIVACY_STATEMENT = "CMTrace Open requires no account and sends no analytics, usage, device, crash, identity, or behavioral telemetry when it runs. GitHub provides aggregate release-asset download counts. The download website and the cmtrace.net shortlinks record aggregate uses of download links without storing IP addresses, cookies, user-agent strings, fingerprints, full referrers, or persistent identifiers. The application never sends data to the download analytics system.";

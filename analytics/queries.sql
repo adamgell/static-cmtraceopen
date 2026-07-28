@@ -24,7 +24,7 @@ WHERE timestamp >= NOW() - INTERVAL '30' DAY
   AND blob3 IN ('stable', 'nightly')
   AND blob5 IN ('windows', 'macos', 'linux')
   AND blob8 IN ('manual-only', 'mixed-manual-update')
-  AND blob9 IN ('download-home', 'github-readme', 'github-release', 'cmtraceopen-product', 'nightly-builds-page', 'project-docs')
+  AND blob9 IN ('download-home', 'github-readme', 'github-release', 'cmtraceopen-product', 'nightly-builds-page', 'project-docs', 'cmtrace-net')
 GROUP BY channel, platform, source
 ORDER BY selections DESC
 FORMAT JSON;
