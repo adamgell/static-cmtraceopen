@@ -1,7 +1,9 @@
 ---
+import ProjectStats from "../components/ProjectStats.astro";
 import TrustContract from "../components/TrustContract.astro";
 import { GUIDES } from "../data/site";
 import ProductLayout from "../layouts/ProductLayout.astro";
+import "../styles/stats.css";
 ---
 
 <ProductLayout
@@ -39,6 +41,8 @@ import ProductLayout from "../layouts/ProductLayout.astro";
       </figcaption>
     </figure>
   </section>
+
+  <ProjectStats mode="summary" />
 
   <TrustContract />
 

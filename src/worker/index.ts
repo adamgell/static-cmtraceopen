@@ -6,11 +6,16 @@ import {
   getVerifiedAsset,
   getVerifiedNightlyAsset,
 } from "../lib/releases/github";
+import { getPublicStats } from "../lib/stats/service";
+import { brandedNotFound, redirect, requestAt, secure } from "./response";
+import { handleShortlink, shortlinkRoute } from "./shortlink";
 
-export type Surface = "product" | "download" | "unknown";
+export type Surface = "product" | "download" | "shortlink" | "unknown";
 
 type RuntimeEnv = Env & {
   GITHUB_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  ANALYTICS_READ_TOKEN?: string;
 };
 
 const PRODUCT_HOSTS = new Set([
@@ -35,44 +40,12 @@ const DOWNLOAD_SHARED_FILES = new Set([
   "/site.webmanifest",
 ]);
 
-const SECURITY_HEADERS = {
-  "Content-Security-Policy":
-    "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'",
-  "Referrer-Policy": "no-referrer",
-  "X-Content-Type-Options": "nosniff",
-  "Permissions-Policy":
-    "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
-} as const;
-
 export function surfaceFor(hostname: string): Surface {
   const host = hostname.toLowerCase().split(":", 1)[0];
   if (PRODUCT_HOSTS.has(host)) return "product";
   if (DOWNLOAD_HOSTS.has(host)) return "download";
+  if (shortlinkRoute(host)) return "shortlink";
   return "unknown";
-}
-
-function secure(response: Response, status = response.status): Response {
-  const headers = new Headers(response.headers);
-  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
-    headers.set(name, value);
-  }
-  return new Response(response.body, {
-    status,
-    statusText: status === response.status ? response.statusText : undefined,
-    headers,
-  });
-}
-
-function redirect(location: string, noStore = false): Response {
-  const headers = new Headers({ Location: location });
-  if (noStore) headers.set("Cache-Control", "no-store");
-  return secure(new Response(null, { status: 302, headers }));
-}
-
-function requestAt(request: Request, pathname: string): Request {
-  const url = new URL(request.url);
-  url.pathname = pathname;
-  return new Request(url, request);
 }
 
 function githubFetcher(env: RuntimeEnv, fetcher: typeof fetch): typeof fetch {
@@ -100,15 +73,11 @@ function githubFetcher(env: RuntimeEnv, fetcher: typeof fetch): typeof fetch {
   }) as typeof fetch;
 }
 
-async function brandedNotFound(request: Request, env: Env): Promise<Response> {
-  const response = await env.ASSETS.fetch(requestAt(request, "/404/"));
-  return secure(response, 404);
-}
-
 async function handleProduct(
   request: Request,
-  env: Env,
+  env: RuntimeEnv,
   url: URL,
+  githubApiFetcher: typeof fetch,
   fetcher: typeof fetch,
 ): Promise<Response> {
   if (url.pathname === "/download" || url.pathname === "/download/") {
@@ -116,10 +85,38 @@ async function handleProduct(
   }
   if (request.method === "GET" && url.pathname === "/api/releases/nightly") {
     try {
-      return secure(Response.json(await getNightlyRelease(request, fetcher)));
+      return secure(Response.json(await getNightlyRelease(request, githubApiFetcher)));
     } catch {
       return secure(Response.json({ error: "Nightly release unavailable." }, { status: 503 }));
     }
+  }
+  if (url.pathname === "/api/stats") {
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return brandedNotFound(request, env);
+    }
+
+    const { status, stats } = await getPublicStats(
+      request,
+      {
+        cloudflareAccountId: env.CLOUDFLARE_ACCOUNT_ID,
+        analyticsReadToken: env.ANALYTICS_READ_TOKEN,
+      },
+      {
+        githubFetcher: githubApiFetcher,
+        analyticsFetcher: fetcher,
+      },
+    );
+    const response = Response.json(stats, {
+      status,
+      headers: { "Cache-Control": "public, max-age=300" },
+    });
+    if (request.method === "HEAD") {
+      return secure(new Response(null, {
+        status,
+        headers: response.headers,
+      }));
+    }
+    return secure(response);
   }
   return secure(await env.ASSETS.fetch(request));
 }
@@ -155,7 +152,7 @@ async function handleDownload(
       const asset = await getVerifiedAsset(id, request, fetcher);
       const source = normalizeSource(url.searchParams.get("source"));
       recordDownload(env.DOWNLOAD_EVENTS, asset, source);
-      return redirect(asset.browserDownloadUrl, true);
+      return redirect(asset.browserDownloadUrl, { cacheControl: "no-store" });
     } catch {
       return brandedNotFound(request, env);
     }
@@ -170,7 +167,7 @@ async function handleDownload(
       const asset = await getVerifiedNightlyAsset(id, request, fetcher);
       const source = normalizeSource(url.searchParams.get("source"));
       recordDownload(env.DOWNLOAD_EVENTS, asset, source);
-      return redirect(asset.browserDownloadUrl, true);
+      return redirect(asset.browserDownloadUrl, { cacheControl: "no-store" });
     } catch {
       return brandedNotFound(request, env);
     }
@@ -188,15 +185,21 @@ async function handleDownload(
 
 export async function handleRequest(
   request: Request,
-  env: Env,
+  env: RuntimeEnv,
   fetcher: typeof fetch = fetch,
 ): Promise<Response> {
   const url = new URL(request.url);
   const surface = surfaceFor(url.hostname);
   const releaseFetcher = githubFetcher(env, fetcher);
 
-  if (surface === "product") return handleProduct(request, env, url, releaseFetcher);
+  if (surface === "product") {
+    return handleProduct(request, env, url, releaseFetcher, fetcher);
+  }
   if (surface === "download") return handleDownload(request, env, url, releaseFetcher);
+  if (surface === "shortlink") {
+    const route = shortlinkRoute(url.hostname);
+    if (route) return handleShortlink(request, env, url, route, releaseFetcher);
+  }
   return secure(new Response("Misdirected request", { status: 421 }));
 }
 

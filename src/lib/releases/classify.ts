@@ -35,13 +35,14 @@ const UNKNOWN: AssetClassification = {
   deliveryRole: "unknown",
 };
 
-const SOURCE_LABELS = new Set<SourceLabel>([
+export const SOURCE_LABELS = new Set<SourceLabel>([
   "download-home",
   "github-readme",
   "github-release",
   "cmtraceopen-product",
   "nightly-builds-page",
   "project-docs",
+  "cmtrace-net",
 ]);
 
 function windowsClassification(

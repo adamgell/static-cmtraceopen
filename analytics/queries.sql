@@ -12,3 +12,19 @@ FROM cmtraceopen_download_events
 WHERE timestamp >= NOW() - INTERVAL '30' DAY
 GROUP BY channel, platform, package_type, delivery_role
 ORDER BY selections DESC;
+
+-- Public 30-day selection totals served by the scoped Analytics Engine reader.
+SELECT
+  blob3 AS channel,
+  blob5 AS platform,
+  blob9 AS source,
+  SUM(_sample_interval * double1) AS selections
+FROM cmtraceopen_download_events
+WHERE timestamp >= NOW() - INTERVAL '30' DAY
+  AND blob3 IN ('stable', 'nightly')
+  AND blob5 IN ('windows', 'macos', 'linux')
+  AND blob8 IN ('manual-only', 'mixed-manual-update')
+  AND blob9 IN ('download-home', 'github-readme', 'github-release', 'cmtraceopen-product', 'nightly-builds-page', 'project-docs', 'cmtrace-net')
+GROUP BY channel, platform, source
+ORDER BY selections DESC
+FORMAT JSON;

@@ -1,0 +1,191 @@
+---
+interface Props {
+  mode: "summary" | "full";
+}
+
+const { mode } = Astro.props;
+const isFull = mode === "full";
+---
+
+<section
+  class:list={["project-stats", `project-stats--${mode}`]}
+  aria-labelledby={`project-stats-${mode}-heading`}
+  data-project-stats
+  data-mode={mode}
+>
+  <div class="stats-heading">
+    <span class="technical-label">PROJECT SIGNAL</span>
+    <h2 id={`project-stats-${mode}-heading`}>
+      {isFull ? "The public evidence ledger." : "A measured view of the project."}
+    </h2>
+  </div>
+
+  <dl class="stats-headlines">
+    <div>
+      <dt>Package downloads reported by GitHub</dt>
+      <dd data-stat="package-total">Loading…</dd>
+    </div>
+    <div>
+      <dt>GitHub stars</dt>
+      <dd data-stat="stars">Loading…</dd>
+    </div>
+    <div>
+      <dt>30-day verified selections</dt>
+      <dd data-stat="selection-total">Loading…</dd>
+    </div>
+  </dl>
+
+  <p class="stats-live-status" role="status" aria-live="polite" data-stats-status>
+    Loading project stats…
+  </p>
+
+  {!isFull && (
+    <div class="stats-summary-note">
+      <p>Aggregate project signals, not users or installations.</p>
+      <a href="/stats/">Explore project stats</a>
+    </div>
+  )}
+
+  {isFull && (
+    <div class="stats-ledger">
+      <section class="stats-ledger-group" aria-labelledby="github-breakdown-heading">
+        <div class="stats-ledger-intro">
+          <span class="technical-label">GITHUB RELEASE EVIDENCE</span>
+          <h3 id="github-breakdown-heading">Package request breakdown</h3>
+          <p>Cumulative counts reported for human-installable release assets.</p>
+        </div>
+
+        <div class="stats-table-grid">
+          <div class="stats-table-wrap" tabindex="0" aria-label="Package downloads by release channel table">
+            <table>
+              <caption>Package downloads by release channel</caption>
+              <thead>
+                <tr><th scope="col">Channel</th><th scope="col">Requests</th></tr>
+              </thead>
+              <tbody>
+                <tr data-stat="github-channel-stable">
+                  <th scope="row">Stable releases</th><td data-stat="github-stable">Loading…</td>
+                </tr>
+                <tr data-stat="github-channel-current-nightly">
+                  <th scope="row">Current nightly</th><td data-stat="github-current-nightly">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="stats-table-wrap" tabindex="0" aria-label="Package downloads by platform table">
+            <table>
+              <caption>Package downloads by platform</caption>
+              <thead>
+                <tr><th scope="col">Platform</th><th scope="col">Requests</th></tr>
+              </thead>
+              <tbody>
+                <tr data-stat="github-platform-windows">
+                  <th scope="row">Windows</th><td data-stat="github-windows">Loading…</td>
+                </tr>
+                <tr data-stat="github-platform-macos">
+                  <th scope="row">macOS</th><td data-stat="github-macos">Loading…</td>
+                </tr>
+                <tr data-stat="github-platform-linux">
+                  <th scope="row">Linux</th><td data-stat="github-linux">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-ledger-group" aria-labelledby="selection-breakdown-heading">
+        <div class="stats-ledger-intro">
+          <span class="technical-label">VERIFIED LINK EVIDENCE · 30 DAYS</span>
+          <h3 id="selection-breakdown-heading">Download-link selections</h3>
+          <p>Aggregate selections of verified package links, separate from GitHub request counts.</p>
+        </div>
+
+        <div class="stats-table-grid">
+          <div class="stats-table-wrap" tabindex="0" aria-label="Verified selections by channel table">
+            <table>
+              <caption>Verified selections by channel</caption>
+              <thead>
+                <tr><th scope="col">Channel</th><th scope="col">Selections</th></tr>
+              </thead>
+              <tbody>
+                <tr data-stat="selection-channel-stable">
+                  <th scope="row">Stable</th><td data-stat="selection-stable">Loading…</td>
+                </tr>
+                <tr data-stat="selection-channel-nightly">
+                  <th scope="row">Nightly</th><td data-stat="selection-nightly">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="stats-table-wrap" tabindex="0" aria-label="Verified selections by platform table">
+            <table>
+              <caption>Verified selections by platform</caption>
+              <thead>
+                <tr><th scope="col">Platform</th><th scope="col">Selections</th></tr>
+              </thead>
+              <tbody>
+                <tr data-stat="selection-platform-windows">
+                  <th scope="row">Windows</th><td data-stat="selection-windows">Loading…</td>
+                </tr>
+                <tr data-stat="selection-platform-macos">
+                  <th scope="row">macOS</th><td data-stat="selection-macos">Loading…</td>
+                </tr>
+                <tr data-stat="selection-platform-linux">
+                  <th scope="row">Linux</th><td data-stat="selection-linux">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="stats-table-wrap stats-table-wrap--sources" tabindex="0" aria-label="Verified selections by source table">
+          <table>
+            <caption>Verified selections by known project source</caption>
+            <thead>
+              <tr><th scope="col">Source</th><th scope="col">Selections</th></tr>
+            </thead>
+            <tbody data-stat="selection-source-body">
+              <tr><th scope="row">Loading…</th><td>Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="stats-ledger-group" aria-labelledby="provider-heading">
+        <div class="stats-ledger-intro">
+          <span class="technical-label">PROVIDER READOUT</span>
+          <h3 id="provider-heading">Source freshness</h3>
+          <p>Availability and timestamps travel with the evidence rather than being inferred by the browser.</p>
+        </div>
+
+        <div class="stats-table-wrap" tabindex="0" aria-label="Project statistics provider status table">
+          <table>
+            <caption>Project statistics provider status</caption>
+            <thead>
+              <tr><th scope="col">Provider</th><th scope="col">Status</th><th scope="col">Updated</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">GitHub</th>
+                <td data-stat="github-status">Loading…</td>
+                <td data-stat="github-updated-at">Loading…</td>
+              </tr>
+              <tr>
+                <th scope="row">Verified selections</th>
+                <td data-stat="selections-status">Loading…</td>
+                <td data-stat="selections-updated-at">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  )}
+
+  <script>
+    import "../scripts/project-stats";
+  </script>
+</section>

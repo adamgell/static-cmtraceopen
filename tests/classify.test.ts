@@ -56,6 +56,7 @@ describe("release asset classification contract", () => {
     "cmtraceopen-product",
     "nightly-builds-page",
     "project-docs",
+    "cmtrace-net",
   ])("accepts source %s", (source) => {
     expect(normalizeSource(source)).toBe(source);
   });

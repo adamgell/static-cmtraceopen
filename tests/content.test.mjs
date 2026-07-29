@@ -13,6 +13,7 @@ const routeExpectations = new Map([
   ["field-guide/real-time-tailing/index.html", ["Real-Time Tailing: Watch Logs as They Happen", "Pause and Resume"]],
   ["download/index.html", ["Continue to the stable download center", "https://download.cmtraceopen.com/?source=cmtraceopen-product"]],
   ["nightly/index.html", ["NIGHTLY CHANNEL · DEVELOPMENT BUILDS", "Builds from main, ready for testing."]],
+  ["stats/index.html", ["Aggregate project signals, not users or installations", "current mutable nightly release", "30-day verified selections"]],
 ]);
 
 const workflowExpectations = new Map([
@@ -48,7 +49,31 @@ test("homepage publishes the product contract", async () => {
   assert.doesNotMatch(page, /Take the investigation workspace with you|CURRENT STABLE RELEASE · WINDOWS · MACOS · LINUX/);
   assert.doesNotMatch(page, /href="\/releases\/"|>Releases<\/a>/);
   assert.match(page, /href="\/field-guide\/">Field Guide<\/a>/);
-  assert.doesNotMatch(page, /downloads? this (week|month)|GitHub stars|formats supported|errors decoded/i);
+  assert.match(page, /class="project-stats project-stats--summary"/);
+  assert.match(page, /GitHub stars/);
+  assert.match(page, /Aggregate project signals, not users or installations\./);
+  assert.match(page, /href="\/stats\/">Explore project stats<\/a>/);
+  assert.doesNotMatch(page, /downloads? this (week|month)|formats supported|errors decoded/i);
+
+  const productViewIndex = page.indexOf('id="product-view"');
+  const projectStatsIndex = page.indexOf('class="project-stats project-stats--summary"');
+  const trustContractIndex = page.indexOf('class="trust-contract"');
+  assert.ok(productViewIndex >= 0, "homepage must render the product view");
+  assert.ok(projectStatsIndex > productViewIndex, "project stats must follow the product view");
+  assert.ok(trustContractIndex > projectStatsIndex, "the trust contract must follow project stats");
+});
+
+test("product navigation publishes the project stats ledger", async () => {
+  for (const path of ["index.html", "stats/index.html"]) {
+    const page = await html(path);
+    const header = page.match(/<header>.*<\/header>/s)?.[0];
+    const footer = page.match(/<footer>.*<\/footer>/s)?.[0];
+
+    assert.ok(header, `${path} must render a header`);
+    assert.ok(footer, `${path} must render a footer`);
+    assert.match(header, /<a href="\/stats\/">Stats<\/a>/);
+    assert.match(footer, /<a href="\/stats\/">Stats<\/a>/);
+  }
 });
 
 test("product trust and resource routes publish canonical destinations", async () => {
