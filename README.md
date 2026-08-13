@@ -38,7 +38,7 @@ Those five commands are exactly what `.github/workflows/ci.yml` runs, split acro
 
 ## Cloudflare
 
-**Pushing to `main` deploys to production.** The repository is connected to Cloudflare Workers Builds, which builds and deploys on every push to `main` — there is no manual promotion step, and Cloudflare does not wait for GitHub Actions. That is why `main` is protected and changes land through a pull request: the CI gate in `.github/workflows/ci.yml` is the only thing standing between a commit and eleven live hostnames.
+**Pushing to `main` deploys to production.** The repository is connected to Cloudflare Workers Builds, which builds and deploys on every push to `main` — there is no manual promotion step, and Cloudflare does not wait for GitHub Actions. That is why `main` is protected and changes land through a pull request: the CI gate in `.github/workflows/ci.yml` is the only thing standing between a commit and twelve live hostnames.
 
 Workers Builds settings:
 
