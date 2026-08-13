@@ -138,6 +138,8 @@ const SHORTLINK_NAMES = [
   "CMTrace-Open_1.5.0_x64-setup.exe",
   "CMTrace-Open_1.5.0_x64.msi",
   "CMTrace.Open_1.5.0_aarch64.dmg",
+  "CMTrace.Open_1.5.0_amd64.AppImage",
+  "CMTrace.Open_1.5.0_amd64.deb",
 ];
 
 function githubAsset(name: string, id: number, tag = SHORTLINK_TAG) {
@@ -658,6 +660,7 @@ describe("cmtrace.net shortlink surface", () => {
     ["lite", "CMTrace-Open-Lite_1.5.0_x64.exe"],
     ["mac", "CMTrace.Open_1.5.0_aarch64.dmg"],
     ["msi", "CMTrace-Open_1.5.0_x64.msi"],
+    ["linux", "CMTrace.Open_1.5.0_amd64.AppImage"],
   ])("redirects %s straight to the latest %s", async (host, name) => {
     const { env, writeDataPoint } = environment();
 
@@ -923,6 +926,7 @@ describe("cmtrace.net shortlink surface", () => {
     "lite.cmtrace.net",
     "mac.cmtrace.net",
     "msi.cmtrace.net",
+    "linux.cmtrace.net",
     "nightly.cmtrace.net",
   ])("routes %s to the shortlink surface", (host) => {
     expect(surfaceFor(host)).toBe("shortlink");

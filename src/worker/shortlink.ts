@@ -53,6 +53,15 @@ const WINDOWS_X64_MSI = stable({
   edition: "full",
   packageType: "msi",
 });
+// The AppImage rather than the .deb or .rpm: it is the one Linux artifact that
+// runs on any distribution without a package manager, which is what a shortlink
+// pasted into a ticket has to be able to assume.
+const LINUX_X64_APPIMAGE = stable({
+  platform: "linux",
+  architecture: "x64",
+  edition: "full",
+  packageType: "appimage",
+});
 const NIGHTLY_WINDOWS_X64_FULL: ShortlinkRoute = {
   kind: "download",
   channel: "nightly",
@@ -71,6 +80,7 @@ const SUBDOMAINS: [string, ShortlinkRoute][] = [
   ["lite", WINDOWS_X64_LITE],
   ["mac", MACOS_ARM64_DMG],
   ["msi", WINDOWS_X64_MSI],
+  ["linux", LINUX_X64_APPIMAGE],
   ["nightly", NIGHTLY_WINDOWS_X64_FULL],
 ];
 

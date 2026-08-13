@@ -20,6 +20,7 @@
     { "pattern": "lite.cmtrace.net", "custom_domain": true },
     { "pattern": "mac.cmtrace.net", "custom_domain": true },
     { "pattern": "msi.cmtrace.net", "custom_domain": true },
+    { "pattern": "linux.cmtrace.net", "custom_domain": true },
     { "pattern": "nightly.cmtrace.net", "custom_domain": true }
   ],
   "assets": {

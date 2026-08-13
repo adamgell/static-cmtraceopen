@@ -54,9 +54,11 @@ The Worker entry point, static assets, Analytics Engine binding, and compatibili
 - `cmtraceopen.com`
 - `www.cmtraceopen.com`
 - `download.cmtraceopen.com`
-- `cmtrace.net`, `www.cmtrace.net`, `win.cmtrace.net`, `winarm.cmtrace.net`, `lite.cmtrace.net`, `mac.cmtrace.net`, `msi.cmtrace.net`, `nightly.cmtrace.net`
+- `cmtrace.net`, `www.cmtrace.net`, `win.cmtrace.net`, `winarm.cmtrace.net`, `lite.cmtrace.net`, `mac.cmtrace.net`, `msi.cmtrace.net`, `linux.cmtrace.net`, `nightly.cmtrace.net`
 
-All of these zones live on the same Cloudflare account as the Worker (verify with `npx wrangler whoami`). Attaching a custom domain writes a DNS record, which the local OAuth login is not scoped for — the eight `cmtrace.net` domains were attached through the dashboard (Workers & Pages → the Worker → Domains → Add Domain), and `wrangler deploy` now reconciles against `wrangler.jsonc` without needing the permission. Add any future domain the same way.
+All of these zones live on the same Cloudflare account as the Worker (verify with `npx wrangler whoami`). Attaching a custom domain writes a DNS record, which the local OAuth login is not scoped for — the nine `cmtrace.net` domains were attached through the dashboard (Workers & Pages → the Worker → Domains → Add Domain), and `wrangler deploy` now reconciles against `wrangler.jsonc` without needing the permission. Add any future domain the same way.
+
+A hostname listed in `wrangler.jsonc` but never attached in the dashboard stays unresolvable, so adding the route alone is not enough: attach the domain first, then deploy.
 
 Do not commit Cloudflare credentials or local `.env` files.
 
@@ -72,6 +74,7 @@ Memorable direct-download hostnames. Each resolves the latest release at request
 | `lite.cmtrace.net` | Windows x64 Lite portable EXE |
 | `mac.cmtrace.net` | macOS arm64 DMG |
 | `msi.cmtrace.net` | Windows x64 MSI |
+| `linux.cmtrace.net` | Linux x64 AppImage |
 | `nightly.cmtrace.net` | Nightly channel Windows x64 full portable EXE |
 
 The latest release is resolved at request time because the artifact filenames embed the version, which GitHub's `/releases/latest/download/` alias cannot address. `GITHUB_TOKEN` is therefore effectively required rather than optional: without it, GitHub's unauthenticated limit of 60 requests per hour per IP is low enough that cold caches will start sending visitors to the chooser instead of the file.
