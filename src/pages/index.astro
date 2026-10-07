@@ -8,15 +8,18 @@ import "../styles/stats.css";
 
 <ProductLayout title="CMTrace Open: free CMTrace replacement for Windows logs" description="Free, open-source log viewer for ConfigMgr/SCCM, Intune, and Autopilot logs. Auto-detects formats, tails in real time, and decodes Windows error codes." canonicalPath="/" image="/images/cmtrace-screenshot.png">
   <section class="hero evidence-grid" aria-labelledby="product-heading">
-  <h2> Join <a href="https://discord.gg/9fryPxumDv">discord</a> for support and feedback </h2>
-  <div class="hero-copy">
-      <h1 id="product-heading">Windows logs shouldn’t require archaeology.</h1>
+    <div class="hero-copy">
+      <h1 id="product-heading">Windows logs shouldn't require archaeology.</h1>
       <p>A native endpoint-evidence workspace for troubleshooting modern Windows—from raw logs to one coherent incident.</p>
       <div class="hero-actions">
         <a class="button button-primary" href="https://download.cmtraceopen.com/?source=cmtraceopen-product">Download for Windows</a>
         <a class="button button-secondary" href="#product-view">Explore the product</a>
       </div>
       <p class="trust-line">No account required. No runtime telemetry collected.</p>
+      <div class="community-invite">
+        <a href="https://discord.gg/9fryPxumDv">Join us on Discord <span aria-hidden="true">↗</span></a>
+        <span>Get support and share feedback.</span>
+      </div>
     </div>
   </section>
 
@@ -104,6 +107,33 @@ import "../styles/stats.css";
 
   .product-view {
     padding-top: 0;
+  }
+
+  .community-invite {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .community-invite a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--cyan);
+    text-decoration: none;
+    transition: border-color 160ms ease, background-color 160ms ease;
+  }
+
+  .community-invite a:hover {
+    border-color: var(--cyan);
+    background: var(--ink-850);
   }
 
   figure {

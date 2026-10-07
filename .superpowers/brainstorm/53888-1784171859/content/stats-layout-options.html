@@ -1,0 +1,58 @@
+<h2>How should public stats feel?</h2>
+<p class="subtitle">All three options use real project language and keep the homepage stats below the product view—never under the main logo.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#071216;color:#eaf9f8;padding:18px;font-family:ui-monospace,monospace;min-height:310px">
+      <div style="font-size:10px;letter-spacing:.12em;color:#58e1dc;margin-bottom:10px">PROJECT SIGNAL</div>
+      <div style="font:700 22px/1.1 system-ui;margin-bottom:14px">Used in the field. Built in the open.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid #28565b">
+        <div style="padding:14px 8px 14px 0;border-right:1px solid #28565b"><strong style="display:block;font:700 22px system-ui">24.3K</strong><span style="font-size:9px;color:#86a4a6">PACKAGE DOWNLOADS</span></div>
+        <div style="padding:14px 8px;border-right:1px solid #28565b"><strong style="display:block;font:700 22px system-ui">229</strong><span style="font-size:9px;color:#86a4a6">GITHUB STARS</span></div>
+        <div style="padding:14px 0 14px 8px"><strong style="display:block;font:700 22px system-ui">—</strong><span style="font-size:9px;color:#86a4a6">30-DAY SELECTIONS</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.35fr .65fr;gap:12px;margin-top:18px">
+        <div style="border-top:1px solid #58e1dc;padding-top:10px"><div style="font-size:9px;color:#58e1dc">DOWNLOADS BY CHANNEL</div><div style="display:flex;justify-content:space-between;margin-top:10px;font-size:11px"><span>Stable</span><b>24,301</b></div><div style="height:5px;background:#183137;margin:5px 0"><i style="display:block;width:94%;height:100%;background:#58e1dc"></i></div><div style="display:flex;justify-content:space-between;font-size:11px"><span>Current nightly</span><b>4</b></div></div>
+        <div style="border:1px solid #28565b;padding:10px;font-size:9px;color:#86a4a6">UPDATED<br><b style="color:#eaf9f8;font-size:11px">HOURLY</b><br><br>Counts are aggregate signals, not users or installations.</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · Evidence strip + ledger <span style="color:#27b6ad">Recommended</span></h3>
+      <p>A restrained three-number strip on the homepage; a structured `/stats/` page with channel and platform breakdowns, definitions, and update time.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#071216;color:#eaf9f8;padding:18px;font-family:ui-monospace,monospace;min-height:310px">
+      <div style="font-size:10px;letter-spacing:.12em;color:#58e1dc">OPEN SOURCE, IN MOTION</div>
+      <div style="font:750 48px/.95 system-ui;margin:18px 0 6px">24,305</div>
+      <div style="font-size:10px;color:#86a4a6">STABLE + NIGHTLY PACKAGE DOWNLOADS</div>
+      <p style="font:500 15px/1.45 system-ui;margin:22px 0;color:#c9dddd">CMTrace Open is built publicly and downloaded directly from its GitHub release record.</p>
+      <div style="display:flex;gap:24px;border-top:1px solid #28565b;padding-top:14px"><div><b style="font:700 22px system-ui">229</b><br><span style="font-size:9px;color:#86a4a6">STARS</span></div><div><b style="font:700 22px system-ui">—</b><br><span style="font-size:9px;color:#86a4a6">30-DAY SELECTIONS</span></div></div>
+      <div style="margin-top:23px;color:#58e1dc;font-size:10px">EXPLORE THE NUMBERS ↗</div>
+    </div>
+    <div class="card-body">
+      <h3>B · Editorial snapshot</h3>
+      <p>One large download total carries the story. Stars and recent selections are supporting context. More expressive, but less useful for comparison.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#071216;color:#eaf9f8;padding:18px;font-family:ui-monospace,monospace;min-height:310px">
+      <div style="display:flex;justify-content:space-between;align-items:end;border-bottom:1px solid #28565b;padding-bottom:10px"><div><div style="font-size:9px;color:#58e1dc">PUBLIC PROJECT METRICS</div><b style="font:700 20px system-ui">Distribution dashboard</b></div><span style="font-size:9px;color:#86a4a6">LIVE</span></div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px">
+        <div style="border:1px solid #28565b;padding:10px"><span style="font-size:8px;color:#86a4a6">PACKAGE DOWNLOADS</span><b style="display:block;font:700 21px system-ui">24,305</b></div>
+        <div style="border:1px solid #28565b;padding:10px"><span style="font-size:8px;color:#86a4a6">GITHUB STARS</span><b style="display:block;font:700 21px system-ui">229</b></div>
+        <div style="border:1px solid #28565b;padding:10px"><span style="font-size:8px;color:#86a4a6">STABLE</span><b style="display:block;font:700 21px system-ui">24,301</b></div>
+        <div style="border:1px solid #28565b;padding:10px"><span style="font-size:8px;color:#86a4a6">CURRENT NIGHTLY</span><b style="display:block;font:700 21px system-ui">4</b></div>
+      </div>
+      <div style="height:74px;border:1px solid #28565b;margin-top:8px;padding:9px"><span style="font-size:8px;color:#86a4a6">30-DAY SELECTION TREND</span><div style="display:flex;align-items:end;gap:5px;height:42px"><i style="width:12%;height:20%;background:#28565b"></i><i style="width:12%;height:45%;background:#28565b"></i><i style="width:12%;height:35%;background:#28565b"></i><i style="width:12%;height:65%;background:#58e1dc"></i><i style="width:12%;height:55%;background:#58e1dc"></i><i style="width:12%;height:80%;background:#58e1dc"></i></div></div>
+    </div>
+    <div class="card-body">
+      <h3>C · Operations dashboard</h3>
+      <p>Dense metric cards and charts on both surfaces. Maximum information, but it risks making the product site feel like an internal analytics console.</p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:24px">Click the direction that feels right, then tell me what you like or dislike in the terminal.</p>
