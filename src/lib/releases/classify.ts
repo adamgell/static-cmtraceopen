@@ -82,6 +82,28 @@ function linuxClassification(
 }
 
 export function classifyAsset(name: string): AssetClassification {
+  const evidence = /^(appimage-abi|macos-trust)-\d+\.\d+\.\d+\.json$/.exec(name);
+  if (evidence) {
+    return {
+      platform: evidence[1] === "appimage-abi" ? "linux" : "macos",
+      architecture: evidence[1] === "appimage-abi" ? "x64" : "arm64",
+      edition: "not-applicable",
+      packageType: "release-evidence",
+      deliveryRole: "supporting-file",
+    };
+  }
+
+  const exporter = /^event-log-export-\d+\.\d+\.\d+-(aarch64-apple-darwin|x86_64-pc-windows-msvc\.exe|x86_64-unknown-linux-gnu)$/.exec(name);
+  if (exporter) {
+    return {
+      platform: exporter[1] === "aarch64-apple-darwin" ? "macos" : exporter[1] === "x86_64-pc-windows-msvc.exe" ? "windows" : "linux",
+      architecture: exporter[1] === "aarch64-apple-darwin" ? "arm64" : "x64",
+      edition: "not-applicable",
+      packageType: "headless-exporter",
+      deliveryRole: "supporting-file",
+    };
+  }
+
   if (/^latest\.json$/.test(name)) {
     return {
       platform: "cross-platform",

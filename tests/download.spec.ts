@@ -1,3 +1,5 @@
+import { classifyAsset } from "../src/lib/releases/classify";
+const observedRelease = JSON.parse(readFileSync(new URL("./fixtures/release-1.6.3-observed.json", import.meta.url), "utf8")) as { tag_name: string; name: string; published_at: string; html_url: string; assets: Array<{ id: number; name: string; size: number; content_type: string; browser_download_url: string }> };
 import AxeBuilder from "@axe-core/playwright";
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
@@ -246,4 +248,27 @@ test("contradictory classified fields cannot turn latest.json into a user packag
   await expect(page.getByRole("heading", { name: "Release discovery is temporarily unavailable" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "RPM package" })).toHaveCount(0);
   await expect(page.locator('a[href^="/asset/"]')).toHaveCount(0);
+});
+
+ test("published 1.6.3 inventory renders packages and known technical files", async ({ page }) => {
+  const normalized = {
+    tag: observedRelease.tag_name, name: observedRelease.name,
+    publishedAt: observedRelease.published_at, htmlUrl: observedRelease.html_url,
+    assets: observedRelease.assets.map(a => ({ ...classifyAsset(a.name), id: a.id,
+      name: a.name, size: a.size, contentType: a.content_type,
+      browserDownloadUrl: a.browser_download_url, releaseTag: observedRelease.tag_name,
+      channel: "stable", publishedAt: observedRelease.published_at })),
+  };
+  await page.route("**/api/releases/stable", route => route.fulfill({ status: 200,
+    contentType: "application/json", body: JSON.stringify(normalized) }));
+  await page.goto("/_download/?source=github-release");
+  await expect(page.locator("[data-release-name]")).toHaveText(observedRelease.name);
+  await expect(page.getByText("Full portable application", { exact: true })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "All assets" })).toBeVisible();
+  await page.getByRole("tab", { name: "All assets" }).click();
+  const technical = page.locator("[data-technical-list]");
+  for (const a of observedRelease.assets.filter(a => /^(appimage-abi-|macos-trust-|event-log-export-)/.test(a.name))) {
+    await expect(technical.getByText(a.name, { exact: true })).toBeVisible();
+  }
+  await expect(page.getByText("Release discovery is temporarily unavailable", { exact: true })).toHaveCount(0);
 });

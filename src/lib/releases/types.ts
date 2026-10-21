@@ -15,6 +15,8 @@ export type PackageType =
   | "updater-archive"
   | "signature"
   | "sbom"
+  | "release-evidence"
+  | "headless-exporter"
   | "unknown";
 export type DeliveryRole =
   | "manual-only"
