@@ -1,0 +1,199 @@
+{
+  "tag_name": "v1.6.3",
+  "name": "CMTrace Open v1.6.3",
+  "published_at": "2026-10-21T13:13:02Z",
+  "html_url": "https://github.com/adamgell/cmtraceopen/releases/tag/v1.6.3",
+  "draft": false,
+  "prerelease": false,
+  "assets": [
+    {
+      "id": 661112524,
+      "name": "appimage-abi-1.6.3.json",
+      "size": 1885706,
+      "content_type": "application/json",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/appimage-abi-1.6.3.json"
+    },
+    {
+      "id": 661134512,
+      "name": "CMTrace-Open-Lite_1.6.3_arm64.exe",
+      "size": 18279176,
+      "content_type": "application/x-msdownload",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open-Lite_1.6.3_arm64.exe"
+    },
+    {
+      "id": 661118707,
+      "name": "CMTrace-Open-Lite_1.6.3_x64.exe",
+      "size": 21842184,
+      "content_type": "application/x-msdownload",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open-Lite_1.6.3_x64.exe"
+    },
+    {
+      "id": 661134510,
+      "name": "CMTrace-Open_1.6.3_arm64-setup.exe",
+      "size": 8800264,
+      "content_type": "application/x-msdownload",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open_1.6.3_arm64-setup.exe"
+    },
+    {
+      "id": 661134507,
+      "name": "CMTrace-Open_1.6.3_arm64-setup.exe.sig",
+      "size": 428,
+      "content_type": "application/octet-stream",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open_1.6.3_arm64-setup.exe.sig"
+    },
+    {
+      "id": 661134514,
+      "name": "CMTrace-Open_1.6.3_arm64.exe",
+      "size": 31035656,
+      "content_type": "application/x-msdownload",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open_1.6.3_arm64.exe"
+    },
+    {
+      "id": 661134504,
+      "name": "CMTrace-Open_1.6.3_arm64.msi",
+      "size": 16707584,
+      "content_type": "application/octet-stream",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open_1.6.3_arm64.msi"
+    },
+    {
+      "id": 661118705,
+      "name": "CMTrace-Open_1.6.3_x64-setup.exe",
+      "size": 9968816,
+      "content_type": "application/x-msdownload",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open_1.6.3_x64-setup.exe"
+    },
+    {
+      "id": 661118712,
+      "name": "CMTrace-Open_1.6.3_x64-setup.exe.sig",
+      "size": 424,
+      "content_type": "application/octet-stream",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open_1.6.3_x64-setup.exe.sig"
+    },
+    {
+      "id": 661118709,
+      "name": "CMTrace-Open_1.6.3_x64.exe",
+      "size": 37397768,
+      "content_type": "application/x-msdownload",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open_1.6.3_x64.exe"
+    },
+    {
+      "id": 661118708,
+      "name": "CMTrace-Open_1.6.3_x64.msi",
+      "size": 17969152,
+      "content_type": "application/octet-stream",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace-Open_1.6.3_x64.msi"
+    },
+    {
+      "id": 661112481,
+      "name": "CMTrace.Open-1.6.3-1.x86_64.rpm",
+      "size": 15270530,
+      "content_type": "application/x-rpm",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace.Open-1.6.3-1.x86_64.rpm"
+    },
+    {
+      "id": 661112480,
+      "name": "CMTrace.Open-1.6.3-1.x86_64.rpm.sig",
+      "size": 440,
+      "content_type": "application/pgp-signature",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace.Open-1.6.3-1.x86_64.rpm.sig"
+    },
+    {
+      "id": 661110660,
+      "name": "CMTrace.Open_1.6.3_aarch64.app.tar.gz",
+      "size": 13505647,
+      "content_type": "application/x-gtar",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace.Open_1.6.3_aarch64.app.tar.gz"
+    },
+    {
+      "id": 661110658,
+      "name": "CMTrace.Open_1.6.3_aarch64.app.tar.gz.sig",
+      "size": 432,
+      "content_type": "application/pgp-signature",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace.Open_1.6.3_aarch64.app.tar.gz.sig"
+    },
+    {
+      "id": 661110659,
+      "name": "CMTrace.Open_1.6.3_aarch64.dmg",
+      "size": 13926955,
+      "content_type": "application/x-apple-diskimage",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace.Open_1.6.3_aarch64.dmg"
+    },
+    {
+      "id": 661112479,
+      "name": "CMTrace.Open_1.6.3_amd64.AppImage",
+      "size": 92191224,
+      "content_type": "application/vnd.appimage",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace.Open_1.6.3_amd64.AppImage"
+    },
+    {
+      "id": 661112478,
+      "name": "CMTrace.Open_1.6.3_amd64.AppImage.sig",
+      "size": 444,
+      "content_type": "application/pgp-signature",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace.Open_1.6.3_amd64.AppImage.sig"
+    },
+    {
+      "id": 661112482,
+      "name": "CMTrace.Open_1.6.3_amd64.deb",
+      "size": 15268976,
+      "content_type": "application/x-debian-package",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace.Open_1.6.3_amd64.deb"
+    },
+    {
+      "id": 661112522,
+      "name": "CMTrace.Open_1.6.3_amd64.deb.sig",
+      "size": 436,
+      "content_type": "application/pgp-signature",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/CMTrace.Open_1.6.3_amd64.deb.sig"
+    },
+    {
+      "id": 661123474,
+      "name": "event-log-export-1.6.3-aarch64-apple-darwin",
+      "size": 7445424,
+      "content_type": "application/octet-stream",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/event-log-export-1.6.3-aarch64-apple-darwin"
+    },
+    {
+      "id": 661138805,
+      "name": "event-log-export-1.6.3-x86_64-pc-windows-msvc.exe",
+      "size": 6912512,
+      "content_type": "application/x-msdownload",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/event-log-export-1.6.3-x86_64-pc-windows-msvc.exe"
+    },
+    {
+      "id": 661127506,
+      "name": "event-log-export-1.6.3-x86_64-unknown-linux-gnu",
+      "size": 11819048,
+      "content_type": "application/octet-stream",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/event-log-export-1.6.3-x86_64-unknown-linux-gnu"
+    },
+    {
+      "id": 661135115,
+      "name": "latest.json",
+      "size": 5174,
+      "content_type": "application/json",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/latest.json"
+    },
+    {
+      "id": 661110657,
+      "name": "macos-trust-1.6.3.json",
+      "size": 16128,
+      "content_type": "application/json",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/macos-trust-1.6.3.json"
+    },
+    {
+      "id": 661112672,
+      "name": "sbom-npm.cdx.json",
+      "size": 407402,
+      "content_type": "application/json",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/sbom-npm.cdx.json"
+    },
+    {
+      "id": 661112678,
+      "name": "sbom-rust.cdx.json",
+      "size": 618600,
+      "content_type": "application/json",
+      "browser_download_url": "https://github.com/adamgell/cmtraceopen/releases/download/v1.6.3/sbom-rust.cdx.json"
+    }
+  ]
+}

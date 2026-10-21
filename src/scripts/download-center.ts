@@ -22,7 +22,7 @@ const architectures = new Set(["x64", "arm64", "unknown"]);
 const editions = new Set(["full", "lite", "not-applicable"]);
 const packageTypes = new Set([
   "portable-exe", "msi", "nsis-setup", "dmg", "deb", "rpm", "appimage",
-  "updater-manifest", "updater-archive", "signature", "sbom",
+  "updater-manifest", "updater-archive", "signature", "sbom", "release-evidence", "headless-exporter",
 ]);
 const deliveryRoles = new Set(["manual-only", "mixed-manual-update", "updater-only", "supporting-file"]);
 
