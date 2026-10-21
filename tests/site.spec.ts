@@ -109,28 +109,28 @@ test("desktop hero keeps its evidence composition tightly grouped", async ({ pag
   const gaps = await page.evaluate(() => {
     const header = document.querySelector<HTMLElement>("body > header");
     const heading = document.querySelector<HTMLElement>(".hero h1");
-    const trustLine = document.querySelector<HTMLElement>(".hero .trust-line");
+    const communityInvite = document.querySelector<HTMLElement>(".hero .community-invite");
     const screenshot = document.querySelector<HTMLElement>(".product-view .screenshot-frame");
 
-    if (!header || !heading || !trustLine || !screenshot) {
+    if (!header || !heading || !communityInvite || !screenshot) {
       throw new Error("Expected homepage composition targets were not rendered");
     }
 
     return {
       headerToHeading: Math.round(heading.getBoundingClientRect().top - header.getBoundingClientRect().bottom),
-      trustToScreenshot: Math.round(screenshot.getBoundingClientRect().top - trustLine.getBoundingClientRect().bottom),
+      contentToScreenshot: Math.round(screenshot.getBoundingClientRect().top - communityInvite.getBoundingClientRect().bottom),
     };
   });
 
   const measuredGaps = `Measured gaps: ${JSON.stringify(gaps)}`;
   expect(gaps.headerToHeading, measuredGaps).toBeLessThanOrEqual(32);
-  expect(gaps.trustToScreenshot, measuredGaps).toBeLessThanOrEqual(64);
+  expect(gaps.contentToScreenshot, measuredGaps).toBeLessThanOrEqual(64);
 });
 
 test("hero spacing remains continuous across the tablet breakpoint", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 
-  const measurements: Record<number, { heroHeight: number; headerToHeading: number; trustToScreenshot: number }> = {};
+  const measurements: Record<number, { heroHeight: number; headerToHeading: number; contentToScreenshot: number }> = {};
 
   for (const width of [900, 901]) {
     await page.setViewportSize({ width, height: 1000 });
@@ -147,17 +147,17 @@ test("hero spacing remains continuous across the tablet breakpoint", async ({ pa
       const header = document.querySelector<HTMLElement>("body > header");
       const hero = document.querySelector<HTMLElement>(".hero");
       const heading = document.querySelector<HTMLElement>(".hero h1");
-      const trustLine = document.querySelector<HTMLElement>(".hero .trust-line");
+      const communityInvite = document.querySelector<HTMLElement>(".hero .community-invite");
       const screenshot = document.querySelector<HTMLElement>(".product-view .screenshot-frame");
 
-      if (!header || !hero || !heading || !trustLine || !screenshot) {
+      if (!header || !hero || !heading || !communityInvite || !screenshot) {
         throw new Error("Expected homepage composition targets were not rendered");
       }
 
       return {
         heroHeight: Math.round(hero.getBoundingClientRect().height),
         headerToHeading: Math.round(heading.getBoundingClientRect().top - header.getBoundingClientRect().bottom),
-        trustToScreenshot: Math.round(screenshot.getBoundingClientRect().top - trustLine.getBoundingClientRect().bottom),
+        contentToScreenshot: Math.round(screenshot.getBoundingClientRect().top - communityInvite.getBoundingClientRect().bottom),
       };
     });
   }
@@ -166,8 +166,8 @@ test("hero spacing remains continuous across the tablet breakpoint", async ({ pa
   for (const width of [900, 901]) {
     expect(measurements[width].headerToHeading, measuredLayout).toBeGreaterThanOrEqual(0);
     expect(measurements[width].headerToHeading, measuredLayout).toBeLessThanOrEqual(32);
-    expect(measurements[width].trustToScreenshot, measuredLayout).toBeGreaterThanOrEqual(0);
-    expect(measurements[width].trustToScreenshot, measuredLayout).toBeLessThanOrEqual(64);
+    expect(measurements[width].contentToScreenshot, measuredLayout).toBeGreaterThanOrEqual(0);
+    expect(measurements[width].contentToScreenshot, measuredLayout).toBeLessThanOrEqual(64);
   }
   expect(Math.abs(measurements[900].heroHeight - measurements[901].heroHeight), measuredLayout).toBeLessThanOrEqual(8);
 });

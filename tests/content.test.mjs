@@ -31,7 +31,7 @@ test("homepage publishes the product contract", async () => {
     page,
     /<a[^>]+aria-label="CMTrace Open home"[^>]*>\s*<img[^>]+class="brand-mark"[^>]+src="\/images\/cmtrace-logo\.png"[^>]+alt=""[^>]*>/,
   );
-  assert.match(page, /Windows logs shouldn&#39;t require archaeology\.|Windows logs shouldn’t require archaeology\./);
+  assert.match(page, /Windows logs shouldn(?:&#39;|'|’)t require archaeology\./);
   assert.match(page, /No account required\. No runtime telemetry collected\./);
   assert.ok(footer, "homepage must render a footer");
   assert.match(footer, /<a href="https:\/\/download\.cmtraceopen\.com\/\?source=cmtraceopen-product">Download<\/a>/);
